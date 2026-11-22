@@ -9,6 +9,7 @@ import { loadSave, writeSave } from '../services/SaveService';
 import { collectedCount, renderCollection } from './Collection';
 import { renderHomeArt } from './HomeArt';
 import { renderMap, totalStars } from './LevelMap';
+import { lessonFor, resetLessons, showLesson } from './Tutorial';
 
 /** Interface HTML : accueil, carte des niveaux, barre d'état, écrans de fin de niveau. */
 export interface UiActions {
@@ -142,6 +143,7 @@ export function initUi(actions: UiActions): void {
   let pausedForSettings = false;
   const openSettings = (): void => {
     sfx.click();
+    $('btn-replay-tips').textContent = 'Revoir les explications du jeu';
     renderVolumes();
     pausedForSettings = !hud.classList.contains('hidden');
     if (pausedForSettings) actions.pause();
@@ -157,6 +159,11 @@ export function initUi(actions: UiActions): void {
   $('btn-settings').addEventListener('click', openSettings);
   $('btn-home-settings').addEventListener('click', openSettings);
   $('btn-settings-close').addEventListener('click', closeSettings);
+  $('btn-replay-tips').addEventListener('click', () => {
+    resetLessons();
+    sfx.click();
+    $('btn-replay-tips').textContent = 'Les explications réapparaîtront au niveau 1.';
+  });
   settings.addEventListener('click', (e) => {
     if (e.target === settings) closeSettings();
   });
@@ -204,6 +211,13 @@ export function initUi(actions: UiActions): void {
   $('btn-next').addEventListener('click', () => play(levelIndex + 1));
 
   bus.on('ready', (e) => {
+    // Explications pour les nouveaux joueurs (une seule fois).
+    const lesson = hud.classList.contains('hidden') ? null : lessonFor(e.levelIndex);
+    if (lesson) {
+      // La scène est encore en création : la pause est appliquée juste après.
+      window.setTimeout(() => actions.pause(), 0);
+      showLesson(lesson, () => actions.resume());
+    }
     if (!homeArtDone) {
       const art = actions.menuArt();
       if (art) {

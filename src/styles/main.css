@@ -980,3 +980,114 @@ body {
   font-size: calc(var(--u) * 22);
   opacity: 0.7;
 }
+
+/* ───────── Explications (premier niveau) ───────── */
+#tutorial {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--u) * 30);
+  animation: fade 0.3s ease-out;
+}
+
+#tutorial.dim {
+  background: rgba(10, 4, 8, 0.62);
+}
+
+#tutorial-spots {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tut-spot {
+  position: absolute;
+  border: calc(var(--u) * 4) solid #ffd66b;
+  box-shadow: 0 0 calc(var(--u) * 30) rgba(255, 214, 107, 0.8);
+  animation: spot-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes spot-pulse {
+  50% { border-color: #fff3dc; }
+}
+
+.tutorial-card {
+  position: relative;
+  width: 100%;
+  max-width: calc(var(--u) * 620);
+  padding: calc(var(--u) * 30) calc(var(--u) * 36) calc(var(--u) * 32);
+  text-align: center;
+  background: linear-gradient(180deg, #3a1820 0%, #22100f 100%);
+  border: calc(var(--u) * 3) solid rgba(232, 196, 128, 0.7);
+  border-radius: calc(var(--u) * 30);
+  box-shadow: 0 calc(var(--u) * 20) calc(var(--u) * 50) rgba(0, 0, 0, 0.6);
+}
+
+.tutorial-card.at-top {
+  align-self: flex-start;
+  margin-top: calc(var(--u) * 150);
+}
+
+.tutorial-card.at-bottom {
+  align-self: flex-end;
+  margin-bottom: calc(var(--u) * 40);
+}
+
+.tutorial-count {
+  margin: 0;
+  font-size: calc(var(--u) * 20);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  min-height: calc(var(--u) * 24);
+}
+
+.tutorial-card h3 {
+  margin: calc(var(--u) * 4) 0 calc(var(--u) * 14);
+  font-size: calc(var(--u) * 40);
+  font-weight: 700;
+  color: #fff3dc;
+}
+
+#tutorial-text {
+  margin: 0 0 calc(var(--u) * 28);
+  font-size: calc(var(--u) * 28);
+  font-weight: 500;
+  line-height: 1.4;
+  color: #fff6e6;
+}
+
+.tutorial-actions {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--u) * 18);
+}
+
+.tutorial-actions .btn {
+  height: calc(var(--u) * 80);
+  font-size: calc(var(--u) * 30);
+  padding: 0 calc(var(--u) * 40);
+}
+
+.link-btn {
+  display: block;
+  margin: calc(var(--u) * -10) auto calc(var(--u) * 28);
+  padding: calc(var(--u) * 8);
+  font-family: var(--font);
+  font-size: calc(var(--u) * 24);
+  font-weight: 600;
+  color: var(--gold);
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+#tutorial-spots svg {
+  position: absolute;
+  inset: 0;
+}

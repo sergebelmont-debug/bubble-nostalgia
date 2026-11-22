@@ -10,15 +10,17 @@ export interface SaveData {
   sfxVolume: number;
   /** Volume de la musique (0–1). */
   musicVolume: number;
+  /** Explications déjà vues (voir ui/Tutorial.ts). */
+  tips: string[];
 }
 
-const DEFAULTS: SaveData = { unlocked: 0, best: {}, sfxVolume: 0.8, musicVolume: 0.6 };
+const DEFAULTS: SaveData = { unlocked: 0, best: {}, sfxVolume: 0.8, musicVolume: 0.6, tips: [] };
 
 let cache: SaveData | null = null;
 
 export function loadSave(): SaveData {
   if (cache) return cache;
-  let data: SaveData = { ...DEFAULTS, best: {} };
+  let data: SaveData = { ...DEFAULTS, best: {}, tips: [] };
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
