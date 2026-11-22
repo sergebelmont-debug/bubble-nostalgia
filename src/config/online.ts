@@ -11,8 +11,8 @@
  * Tant que ces deux valeurs sont vides, le bouton « Classement » est masqué.
  */
 export const ONLINE = {
-  url: '',
-  key: '',
+  url: 'https://xfvyujzzrubpqzrimots.supabase.co',
+  key: 'sb_publishable_0__DCATjWu45u9UGz6VG4g_ZvEUW_uF',
 };
 
 export const isOnline = (): boolean => Boolean(ONLINE.url && ONLINE.key);

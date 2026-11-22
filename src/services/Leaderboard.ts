@@ -76,7 +76,7 @@ async function rpc<T>(name: string, body: Record<string, unknown>): Promise<T> {
   try {
     res = await fetch(`${ONLINE.url.replace(/\/$/, '')}/rest/v1/rpc/${name}`, {
       method: 'POST',
-      headers: { apikey: ONLINE.key, Authorization: `Bearer ${ONLINE.key}`, 'Content-Type': 'application/json' },
+      headers: { apikey: ONLINE.key, 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
       signal: ctrl.signal,
     });
