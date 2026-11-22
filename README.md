@@ -76,7 +76,7 @@ chaque envoi sur la branche `main` teste, construit et publie le jeu.
 Configuration à faire **une seule fois** sur GitHub : *Settings → Pages →
 Build and deployment → Source : « GitHub Actions »*.
 Le jeu est alors accessible sur
-`https://sergebelmont-debug.github.io/serge-belmont-bubble-reveal/`.
+`https://sergebelmont.com/bubble-nostalgia/`.
 
 ## Services externes
 
