@@ -6,6 +6,9 @@ import { LEVELS, MENU_MUSIC } from '../data/levels';
 import type { MenuArt } from '../render/menuArt';
 import { homePhotoUrl } from '../services/PhotoService';
 import { loadSave, writeSave } from '../services/SaveService';
+import { isOnline } from '../config/online';
+import { playerPseudo, syncScores } from '../services/Leaderboard';
+import { initBoard, renderBoard } from './Board';
 import { collectedCount, renderCollection } from './Collection';
 import { renderHomeArt } from './HomeArt';
 import { renderMap, totalStars } from './LevelMap';
@@ -35,6 +38,7 @@ export function initUi(actions: UiActions): void {
   const scoreEl = $('hud-score');
   const shotsPill = $('hud-shots').parentElement!;
   const settings = $('screen-settings');
+  const board = $('screen-board');
   let levelIndex = 0;
   let lastScore = 0;
   let homeArtDone = false;
@@ -42,7 +46,7 @@ export function initUi(actions: UiActions): void {
   $('home-photo').style.backgroundImage = `url("${homePhotoUrl()}")`;
 
   const hideAll = (): void => {
-    for (const el of [hud, home, map, end, collection, viewer, settings]) el.classList.add('hidden');
+    for (const el of [hud, home, map, end, collection, viewer, settings, board]) el.classList.add('hidden');
   };
 
   const showHome = (): void => {
@@ -56,6 +60,27 @@ export function initUi(actions: UiActions): void {
     music.play(MENU_MUSIC);
     actions.resume();
   };
+
+  const showBoard = (): void => {
+    hideAll();
+    actions.pause();
+    board.classList.remove('hidden');
+    music.play(MENU_MUSIC);
+    renderBoard();
+  };
+
+  // Le classement n'apparaît que si le serveur est configuré (config/online.ts).
+  $('btn-board').classList.toggle('hidden', !isOnline());
+  initBoard(() => sfx.click());
+  $('btn-board').addEventListener('click', () => {
+    sfx.unlock();
+    sfx.click();
+    showBoard();
+  });
+  $('btn-board-home').addEventListener('click', () => {
+    sfx.click();
+    showHome();
+  });
 
   const showCollection = (): void => {
     hideAll();
@@ -267,7 +292,15 @@ export function initUi(actions: UiActions): void {
     end.classList.remove('hidden');
   };
 
-  bus.on('win', (r) => showEnd(r, true));
+  bus.on('win', (r) => {
+    showEnd(r, true);
+    if (isOnline()) {
+      void syncScores();
+      if (!playerPseudo() && !$('end-note').textContent) {
+        $('end-note').textContent = 'Choisissez un pseudo dans « Classement » pour comparer vos scores.';
+      }
+    }
+  });
   bus.on('lose', (r) => showEnd(r, false));
 
   showHome();

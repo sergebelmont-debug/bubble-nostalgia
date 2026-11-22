@@ -92,6 +92,20 @@ Les musiques sont dans `public/assets/audio/music/` (MP3). Le menu utilise
 Le joueur règle séparément le volume de la musique et des effets sonores
 (bouton Réglages, roue dentée, sur l'accueil et pendant les parties).
 
+## Classement en ligne (Supabase, gratuit)
+
+Anonyme : pas de compte, le joueur choisit un pseudo. Mise en service :
+
+1. Créer un projet gratuit sur https://supabase.com.
+2. SQL Editor → New query → coller [supabase/classement.sql](supabase/classement.sql) → Run.
+3. Project Settings → API : copier l'adresse du projet et la clé **publique**
+   (anon / publishable) dans [src/config/online.ts](src/config/online.ts).
+   Ne jamais y mettre la clé `service_role` / secrète.
+4. Publier. Le bouton « Classement » apparaît alors sur l'accueil.
+
+Modération : un pseudo indésirable se supprime dans Table Editor → `players`.
+En ajoutant des niveaux, augmenter `bn_level_count()` dans le script SQL.
+
 ## Collection
 
 L'écran « Collection » (menu d'accueil) affiche les photos des niveaux terminés ;

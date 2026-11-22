@@ -376,9 +376,22 @@ body {
     inset 0 calc(var(--u) * 4) 0 rgba(255, 255, 255, 0.22);
 }
 
-#btn-collection {
-  min-width: calc(var(--u) * 400);
+.home-row {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--u) * 18);
   margin-top: calc(var(--u) * 30);
+}
+
+.home-row .btn {
+  min-width: calc(var(--u) * 260);
+  padding: 0 calc(var(--u) * 30);
+  font-size: calc(var(--u) * 31);
+}
+
+#btn-collection:only-child,
+.home-row:has(#btn-board.hidden) #btn-collection {
+  min-width: calc(var(--u) * 400);
 }
 
 .btn .count {
@@ -1090,4 +1103,173 @@ body {
 #tutorial-spots svg {
   position: absolute;
   inset: 0;
+}
+
+/* ───────── Classement ───────── */
+.head-spacer {
+  width: calc(var(--u) * 56);
+}
+
+.board-top {
+  padding: calc(var(--u) * 22) calc(var(--u) * 24) 0;
+}
+
+.board-form label {
+  display: block;
+  margin-bottom: calc(var(--u) * 12);
+  font-size: calc(var(--u) * 24);
+  font-weight: 500;
+  color: #f1dcb4;
+  text-align: center;
+}
+
+.board-form-row {
+  display: flex;
+  gap: calc(var(--u) * 14);
+}
+
+.board-form input {
+  flex: 1;
+  min-width: 0;
+  height: calc(var(--u) * 80);
+  padding: 0 calc(var(--u) * 22);
+  font-family: var(--font);
+  font-size: calc(var(--u) * 30);
+  font-weight: 600;
+  color: #fff6e6;
+  background: rgba(0, 0, 0, 0.35);
+  border: calc(var(--u) * 3) solid rgba(232, 196, 128, 0.6);
+  border-radius: calc(var(--u) * 20);
+  outline: none;
+  user-select: text;
+  -webkit-user-select: text;
+  touch-action: manipulation;
+}
+
+.board-form input:focus {
+  border-color: var(--gold);
+}
+
+.board-form .btn {
+  height: calc(var(--u) * 80);
+  font-size: calc(var(--u) * 28);
+  padding: 0 calc(var(--u) * 30);
+}
+
+.board-msg {
+  min-height: calc(var(--u) * 30);
+  margin: calc(var(--u) * 10) 0 0;
+  font-size: calc(var(--u) * 22);
+  color: #ffb4a8;
+  text-align: center;
+}
+
+.board-me {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--u) * 14);
+  padding: calc(var(--u) * 18) calc(var(--u) * 24);
+  background: rgba(0, 0, 0, 0.3);
+  border: calc(var(--u) * 2) solid rgba(232, 196, 128, 0.5);
+  border-radius: calc(var(--u) * 20);
+}
+
+.board-me b {
+  display: block;
+  font-size: calc(var(--u) * 32);
+  color: #fff3dc;
+}
+
+.board-me span {
+  font-size: calc(var(--u) * 23);
+  color: var(--gold);
+}
+
+.board-me .link-btn {
+  margin: 0;
+}
+
+#board-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  padding: calc(var(--u) * 20) calc(var(--u) * 24) calc(var(--u) * 40);
+}
+
+#board-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+#board-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: calc(var(--u) * 62) 1fr auto;
+  grid-template-areas: 'rank name score' 'rank levels score';
+  align-items: center;
+  column-gap: calc(var(--u) * 14);
+  padding: calc(var(--u) * 12) calc(var(--u) * 18);
+  margin-bottom: calc(var(--u) * 10);
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: calc(var(--u) * 18);
+}
+
+.board-row.me {
+  background: rgba(255, 214, 107, 0.18);
+  border: calc(var(--u) * 2) solid rgba(255, 214, 107, 0.7);
+}
+
+.b-rank {
+  grid-area: rank;
+  text-align: center;
+  font-size: calc(var(--u) * 32);
+  font-weight: 700;
+  color: #f1dcb4;
+}
+
+.medal-1 .b-rank { color: #ffd66b; }
+.medal-2 .b-rank { color: #dfe6ee; }
+.medal-3 .b-rank { color: #e0a46a; }
+
+.b-name {
+  grid-area: name;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: calc(var(--u) * 29);
+  font-weight: 600;
+}
+
+.b-levels {
+  grid-area: levels;
+  font-size: calc(var(--u) * 20);
+  opacity: 0.75;
+}
+
+.b-score {
+  grid-area: score;
+  font-size: calc(var(--u) * 30);
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.board-gap {
+  text-align: center;
+  opacity: 0.6;
+  margin-bottom: calc(var(--u) * 10);
+}
+
+.board-foot {
+  margin: calc(var(--u) * 20) 0 0;
+  font-size: calc(var(--u) * 21);
+  text-align: center;
+  opacity: 0.65;
 }

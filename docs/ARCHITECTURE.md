@@ -68,12 +68,14 @@ communiquent que par le bus d'événements (`app/bus.ts`).
       boule après 3 secondes ; canon redessiné.
 - [x] **Photographies et Collection** : 12 photos carrées, écran Collection
       (photos obtenues / grisées), menu « Bubble Nostalgia » (photo en fond, boules et canon).
+- [x] **Lancement** : aperçu de partage et icônes, explications du niveau 1,
+      classement anonyme (code prêt, serveur Supabase à créer).
 - [ ] **Phase 3 bis** : boules spéciales, récompenses d'étape, réglages graphiques.
 - [ ] **Phase 4 – Polish graphique** : affinage des sphères, du canon, des transitions.
 - [ ] **Phase 5 – Sound design** : musiques (ambiance, victoire, défaite),
       réglages séparés musique / effets / volume général.
 - [ ] **Phase 6 – Collection et communauté** : galerie, défis quotidiens,
-      profil, classement Supabase, partage (Web Share + image de partage).
+      profil, partage (Web Share + image de partage).
 - [ ] **Phase 7 – Tests** sur vrais smartphones et navigateur intégré Facebook.
 - [ ] **Phase 8 – Finalisation** : PWA, mise en ligne.
 

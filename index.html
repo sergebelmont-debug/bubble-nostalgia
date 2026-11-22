@@ -72,11 +72,14 @@
           <div class="home-bottom">
             <p class="tagline">Éclatez les boules, dissipez le brouillard<br />et révélez la photographie.</p>
             <button id="btn-play" class="btn primary" type="button">Jouer</button>
-            <button id="btn-collection" class="btn sepia" type="button">
-              Collection <span id="home-collection" class="count"></span>
-            </button>
+            <div class="home-row">
+              <button id="btn-collection" class="btn sepia" type="button">
+                Collection <span id="home-collection" class="count"></span>
+              </button>
+              <button id="btn-board" class="btn sepia hidden" type="button">Classement</button>
+            </div>
             <p id="home-progress" class="home-progress"></p>
-            <p class="version">Version 0.6</p>
+            <p class="version">Version 0.7</p>
           </div>
         </div>
       </section>
@@ -128,6 +131,38 @@
           <p class="setting-note">À 0 %, le son correspondant est coupé.</p>
           <button id="btn-replay-tips" class="link-btn" type="button">Revoir les explications du jeu</button>
           <button id="btn-settings-close" class="btn primary" type="button">Fermer</button>
+        </div>
+      </section>
+
+      <section id="screen-board" class="overlay collection board hidden">
+        <header class="map-head">
+          <button id="btn-board-home" class="icon-btn" type="button" aria-label="Retour à l'accueil">
+            <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5" /><path d="M6.5 10v9h11v-9" /></svg>
+          </button>
+          <h3>Classement</h3>
+          <span class="head-spacer"></span>
+        </header>
+        <div class="board-top">
+          <form id="board-form" class="board-form" autocomplete="off">
+            <label for="board-pseudo">Choisissez un pseudo pour apparaître au classement (pas de compte à créer)</label>
+            <div class="board-form-row">
+              <input id="board-pseudo" type="text" maxlength="16" minlength="3" placeholder="Votre pseudo" enterkeyhint="done" />
+              <button id="btn-board-save" class="btn primary compact" type="submit">Valider</button>
+            </div>
+            <p id="board-form-msg" class="board-msg" aria-live="polite"></p>
+          </form>
+          <div id="board-me" class="board-me hidden">
+            <div>
+              <b id="board-me-name"></b>
+              <span id="board-me-rank"></span>
+            </div>
+            <button id="btn-board-edit" class="link-btn" type="button">Modifier</button>
+          </div>
+        </div>
+        <div id="board-scroll">
+          <p id="board-status" class="collection-hint" aria-live="polite"></p>
+          <ol id="board-list"></ol>
+          <p class="board-foot">Score total = somme de vos meilleurs scores sur chaque niveau.</p>
         </div>
       </section>
 
