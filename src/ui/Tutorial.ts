@@ -1,199 +1,109 @@
-import { view } from '../app/view';
-import { CANNON_FROM_BOTTOM, DESIGN_W } from '../config/gameConfig';
 import { LEVELS } from '../data/levels';
 import { loadSave, writeSave } from '../services/SaveService';
 
 /**
- * EXPLICATIONS POUR LES NOUVEAUX JOUEURS
- * --------------------------------------
- * Une suite de cartes, chacune pouvant éclairer une zone de l'écran (le reste
- * est assombri). Affichées une seule fois : au premier lancement du niveau 1
- * (les bases), puis au premier niveau qui comporte des murs.
- * Le jeu est en pause pendant la lecture.
+ * AIDE AUX NOUVEAUX JOUEURS
+ * -------------------------
+ * Objectif : jouer tout de suite en ayant compris l'essentiel.
+ *  • 1re partie : UNE carte animée (3 boules de même couleur → la photo se
+ *    dévoile ; glisser pour viser), puis une main animée près du canon
+ *    jusqu'au premier tir (sans bloquer le jeu).
+ *  • 1er niveau avec des murs : un court bandeau, sans pause.
+ *  • Tout le détail reste consultable dans « Comment jouer » (carte des niveaux).
  */
-type Spot =
-  | { kind: 'circle'; x: number; y: number; r: number } // unités de jeu
-  | { kind: 'element'; id: string; pad: number }; // élément HTML
+export type Tip = 'intro' | 'murs';
 
-interface Step {
-  title: string;
-  text: string;
-  spots?: Spot[];
-}
-
-export interface Lesson {
-  id: string;
-  steps: Step[];
-}
-
-const cannonY = (): number => view.h - CANNON_FROM_BOTTOM;
-const CX = DESIGN_W / 2;
-
-function basics(target: number): Lesson {
-  return {
-    id: 'bases',
-    steps: [
-      {
-        title: 'Bienvenue !',
-        text: 'Une photographie de Serge Belmont est cachée sous le brouillard. Éclatez les boules pour la dévoiler.',
-      },
-      {
-        title: 'Viser et tirer',
-        text: 'Posez le doigt sur l’écran et glissez : la ligne pointillée montre le chemin de la boule et l’endroit où elle se posera. Relâchez pour tirer.',
-        spots: [{ kind: 'circle', x: CX, y: cannonY() - 20, r: 130 }],
-      },
-      {
-        title: '3 boules de la même couleur',
-        text: 'Touchez un groupe d’au moins 3 boules de la même couleur que la vôtre (en comptant celle que vous tirez) : elles éclatent et le brouillard se dissipe à cet endroit.',
-      },
-      {
-        title: 'Les boules qui tombent',
-        text: 'Les boules qui ne sont plus accrochées au plafond tombent : elles dévoilent encore plus la photo et rapportent des points en plus.',
-      },
-      {
-        title: 'Rebonds',
-        text: 'La boule rebondit sur les bords de l’écran : servez-vous-en pour atteindre les boules cachées sur les côtés.',
-      },
-      {
-        title: 'Changer de boule',
-        text: 'À gauche, la boule suivante : touchez-la pour l’échanger avec celle du canon. Si vous ne tirez pas pendant 3 secondes, la boule change toute seule (compteur à droite).',
-        spots: [
-          { kind: 'circle', x: CX - 178, y: cannonY() + 44, r: 72 },
-          { kind: 'circle', x: CX + 178, y: cannonY() + 44, r: 72 },
-        ],
-      },
-      {
-        title: 'Votre objectif',
-        text: `Dévoilez ${target} % de la photo (barre en haut) avant d’avoir utilisé tous vos tirs (compteur à droite du score). Attention : si les boules descendent sous la ligne pointillée, la partie est perdue.`,
-        spots: [
-          { kind: 'element', id: 'reveal-bar-wrap', pad: 10 },
-          { kind: 'element', id: 'hud-shots-pill', pad: 8 },
-        ],
-      },
-    ],
-  };
-}
-
-const WALLS: Lesson = {
-  id: 'murs',
-  steps: [
-    {
-      title: 'Nouveau : les murs',
-      text: 'Les barres dorées sont incassables : la boule rebondit dessus comme sur les bords. Visez les murs pour atteindre les boules cachées derrière.',
-    },
-  ],
-};
-
-/** Leçon à montrer au lancement de ce niveau, ou null si déjà vue. */
-export function lessonFor(levelIndex: number): Lesson | null {
+export function tipFor(levelIndex: number): Tip | null {
   const seen = loadSave().tips;
-  const level = LEVELS[levelIndex];
-  if (levelIndex === 0 && !seen.includes('bases')) return basics(level.objective.revealPercent);
+  if (levelIndex === 0 && !seen.includes('intro') && !seen.includes('bases')) return 'intro';
   const firstWalls = LEVELS.findIndex((l) => l.walls?.length);
-  if (levelIndex === firstWalls && !seen.includes('murs')) return WALLS;
+  if (levelIndex === firstWalls && !seen.includes('murs')) return 'murs';
   return null;
 }
 
-/** Fait réapparaître toutes les explications. */
-export function resetLessons(): void {
-  writeSave({ tips: [] });
-}
-
-/** Rectangle arrondi (tracé SVG), pour percer le voile. */
-function roundRect(x: number, y: number, w: number, h: number, r: number): string {
-  const k = Math.min(r, w / 2, h / 2);
-  return `M${x + k} ${y}H${x + w - k}A${k} ${k} 0 0 1 ${x + w} ${y + k}V${y + h - k}A${k} ${k} 0 0 1 ${x + w - k} ${y + h}H${x + k}A${k} ${k} 0 0 1 ${x} ${y + h - k}V${y + k}A${k} ${k} 0 0 1 ${x + k} ${y}Z`;
+function markSeen(tip: Tip): void {
+  const tips = loadSave().tips;
+  if (!tips.includes(tip)) writeSave({ tips: [...tips, tip] });
 }
 
 const $ = (id: string): HTMLElement => document.getElementById(id)!;
 
-/** Affiche une leçon ; `onDone` est appelé à la fin (ou si le joueur passe). */
-export function showLesson(lesson: Lesson, onDone: () => void): void {
-  const root = $('tutorial');
-  const spots = $('tutorial-spots');
-  const title = $('tutorial-title');
-  const text = $('tutorial-text');
-  const count = $('tutorial-count');
-  const next = $('btn-tutorial-next');
-  const skip = $('btn-tutorial-skip');
-  const card = $('tutorial-card');
-  let i = 0;
+/** Main qui pointe (illustration). */
+export const HAND_SVG =
+  '<svg class="hand" viewBox="0 0 40 50" aria-hidden="true"><path d="M15 5a4 4 0 0 1 8 0v15l9 1.6a5 5 0 0 1 4.2 5.9l-2.4 12.2A6 6 0 0 1 27.9 45H18a6 6 0 0 1-4.9-2.6L5.6 31.6a4 4 0 0 1 6.2-5L15 30z" /></svg>';
 
-  const finish = (): void => {
-    root.classList.add('hidden');
-    next.onclick = null;
-    skip.onclick = null;
-    const tips = loadSave().tips;
-    if (!tips.includes(lesson.id)) writeSave({ tips: [...tips, lesson.id] });
-    onDone();
-  };
+/** Boule : image du jeu si disponible, sinon pastille colorée. */
+function ball(src: string | undefined, cls = ''): string {
+  return src
+    ? `<img class="ball ${cls}" src="${src}" alt="" draggable="false" />`
+    : `<i class="ball dot ${cls}"></i>`;
+}
 
-  const render = (): void => {
-    const step = lesson.steps[i];
-    const last = i === lesson.steps.length - 1;
-    title.textContent = step.title;
-    text.textContent = step.text;
-    count.textContent = lesson.steps.length > 1 ? `${i + 1} / ${lesson.steps.length}` : '';
-    next.textContent = last ? 'C’est parti !' : 'Suivant';
-    skip.classList.toggle('hidden', last);
+/** Démonstration animée : 3 boules identiques éclatent, la photo se dévoile. */
+export function matchDemo(bubble: string | undefined, photo: string): string {
+  return `<div class="demo-match" aria-hidden="true">
+    <div class="demo-balls">${ball(bubble, 'b1')}${ball(bubble, 'b2')}${ball(bubble, 'b3')}</div>
+    <span class="demo-arrow">→</span>
+    <div class="demo-photo"><img src="${photo}" alt="" draggable="false" /><i class="demo-fog"></i></div>
+  </div>`;
+}
 
-    const stage = $('stage').getBoundingClientRect();
-    const unit = stage.width / DESIGN_W;
-    spots.innerHTML = '';
-    const holes: string[] = [];
-    let lowest = 0;
-    let highest = Infinity;
-    for (const s of step.spots ?? []) {
-      let x: number;
-      let y: number;
-      let w: number;
-      let h: number;
-      let round = '50%';
-      if (s.kind === 'circle') {
-        x = (s.x - s.r) * unit;
-        y = (s.y - s.r) * unit;
-        w = h = s.r * 2 * unit;
-      } else {
-        const r = document.getElementById(s.id)?.getBoundingClientRect();
-        if (!r) continue;
-        const pad = s.pad * unit;
-        x = r.left - stage.left - pad;
-        y = r.top - stage.top - pad;
-        w = r.width + pad * 2;
-        h = r.height + pad * 2;
-        round = `${h / 2}px`;
-      }
-      const el = document.createElement('div');
-      el.className = 'tut-spot';
-      el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:${round}`;
-      spots.appendChild(el);
-      holes.push(roundRect(x, y, w, h, s.kind === 'circle' ? w / 2 : h / 2));
-      lowest = Math.max(lowest, y + h);
-      highest = Math.min(highest, y);
-    }
-    // Un seul voile sombre, percé à chaque zone éclairée.
-    if (holes.length) {
-      spots.insertAdjacentHTML(
-        'afterbegin',
-        `<svg width="${stage.width}" height="${stage.height}"><path fill-rule="evenodd" fill="rgba(10,4,8,0.62)" d="M0 0H${stage.width}V${stage.height}H0Z ${holes.join(' ')}"/></svg>`,
-      );
-    }
-    root.classList.toggle('dim', !step.spots?.length);
-    // La carte se place à l'écart des zones éclairées.
-    const mid = stage.height / 2;
-    card.classList.toggle('at-top', step.spots?.length ? highest > mid : false);
-    card.classList.toggle('at-bottom', step.spots?.length ? lowest < mid : false);
-  };
+/** Démonstration animée de la visée : trajectoire qui rebondit, doigt qui glisse. */
+export function aimDemo(): string {
+  return `<div class="demo-aim" aria-hidden="true">
+    <svg viewBox="0 0 220 130">
+      <rect x="6" y="4" width="208" height="122" rx="10" class="demo-board" />
+      <path class="demo-path" d="M110 112 L200 58 L150 12" />
+      <circle cx="150" cy="16" r="9" class="demo-target" />
+      <circle cx="110" cy="112" r="11" class="demo-cannon" />
+    </svg>
+    <div class="demo-hand">${HAND_SVG}</div>
+  </div>`;
+}
 
-  next.onclick = () => {
-    if (i < lesson.steps.length - 1) {
-      i++;
-      render();
-    } else {
-      finish();
-    }
-  };
-  skip.onclick = finish;
+/** Carte d'accueil de la toute première partie. */
+export function showIntro(opts: { target: number; photo: string; bubble?: string }, onDone: () => void): void {
+  const root = $('intro');
+  root.innerHTML = `<div class="intro-card" role="dialog" aria-labelledby="intro-title">
+    <h3 id="intro-title">Comment jouer</h3>
+    ${matchDemo(opts.bubble, opts.photo)}
+    <p class="intro-line"><b>3 boules de la même couleur</b> ou plus éclatent et dévoilent la photo.</p>
+    ${aimDemo()}
+    <p class="intro-line"><b>Glissez</b> pour viser, <b>relâchez</b> pour tirer.</p>
+    <p class="intro-goal">Objectif : <b>${opts.target} %</b> de la photo</p>
+    <button id="btn-intro-go" class="btn primary" type="button">C’est parti !</button>
+  </div>`;
   root.classList.remove('hidden');
-  render();
+  $('btn-intro-go').addEventListener('click', () => {
+    root.classList.add('hidden');
+    root.innerHTML = '';
+    markSeen('intro');
+    onDone();
+  });
+}
+
+/** Main animée près du canon, jusqu'au premier tir. Ne bloque pas le jeu. */
+export function showAimHint(): void {
+  $('aim-hint').classList.remove('hidden');
+}
+
+export function hideAimHint(): void {
+  $('aim-hint').classList.add('hidden');
+}
+
+let toastTimer = 0;
+
+/** Court bandeau d'information (sans pause). */
+export function showWallsTip(): void {
+  const toast = $('tip-toast');
+  toast.innerHTML = '<b>Nouveau : les murs</b><span>Incassables : la boule rebondit dessus comme sur les bords.</span>';
+  toast.classList.remove('hidden');
+  markSeen('murs');
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => toast.classList.add('hidden'), 5000);
+}
+
+export function hideTips(): void {
+  window.clearTimeout(toastTimer);
+  for (const id of ['intro', 'aim-hint', 'tip-toast']) $(id).classList.add('hidden');
 }

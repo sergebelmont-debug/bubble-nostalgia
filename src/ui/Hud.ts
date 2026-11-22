@@ -4,7 +4,7 @@ import { sfx } from '../audio/Sfx';
 import { DESIGN_W } from '../config/gameConfig';
 import { LEVELS, MENU_MUSIC } from '../data/levels';
 import type { MenuArt } from '../render/menuArt';
-import { homePhotoUrl } from '../services/PhotoService';
+import { homePhotoUrl, photoUrl } from '../services/PhotoService';
 import { loadSave, writeSave } from '../services/SaveService';
 import { isOnline } from '../config/online';
 import { playerPseudo, syncScores } from '../services/Leaderboard';
@@ -12,7 +12,8 @@ import { initBoard, renderBoard } from './Board';
 import { collectedCount, renderCollection } from './Collection';
 import { renderHomeArt } from './HomeArt';
 import { renderMap, totalStars } from './LevelMap';
-import { lessonFor, resetLessons, showLesson } from './Tutorial';
+import { renderGuide } from './Guide';
+import { HAND_SVG, hideAimHint, hideTips, showAimHint, showIntro, showWallsTip, tipFor } from './Tutorial';
 
 /** Interface HTML : accueil, carte des niveaux, barre d'état, écrans de fin de niveau. */
 export interface UiActions {
@@ -39,6 +40,8 @@ export function initUi(actions: UiActions): void {
   const shotsPill = $('hud-shots').parentElement!;
   const settings = $('screen-settings');
   const board = $('screen-board');
+  const guide = $('screen-guide');
+  $('aim-hint').querySelector('.aim-hand')!.innerHTML = HAND_SVG;
   let levelIndex = 0;
   let lastScore = 0;
   let homeArtDone = false;
@@ -46,7 +49,8 @@ export function initUi(actions: UiActions): void {
   $('home-photo').style.backgroundImage = `url("${homePhotoUrl()}")`;
 
   const hideAll = (): void => {
-    for (const el of [hud, home, map, end, collection, viewer, settings, board]) el.classList.add('hidden');
+    hideTips();
+    for (const el of [hud, home, map, end, collection, viewer, settings, board, guide]) el.classList.add('hidden');
   };
 
   const showHome = (): void => {
@@ -168,7 +172,6 @@ export function initUi(actions: UiActions): void {
   let pausedForSettings = false;
   const openSettings = (): void => {
     sfx.click();
-    $('btn-replay-tips').textContent = 'Revoir les explications du jeu';
     renderVolumes();
     pausedForSettings = !hud.classList.contains('hidden');
     if (pausedForSettings) actions.pause();
@@ -184,11 +187,6 @@ export function initUi(actions: UiActions): void {
   $('btn-settings').addEventListener('click', openSettings);
   $('btn-home-settings').addEventListener('click', openSettings);
   $('btn-settings-close').addEventListener('click', closeSettings);
-  $('btn-replay-tips').addEventListener('click', () => {
-    resetLessons();
-    sfx.click();
-    $('btn-replay-tips').textContent = 'Les explications réapparaîtront au niveau 1.';
-  });
   settings.addEventListener('click', (e) => {
     if (e.target === settings) closeSettings();
   });
@@ -219,6 +217,18 @@ export function initUi(actions: UiActions): void {
     sfx.click();
     viewer.classList.add('hidden');
   });
+  // « Comment jouer » : toutes les règles, depuis la carte des niveaux.
+  $('btn-guide').addEventListener('click', () => {
+    sfx.click();
+    hideAll();
+    renderGuide($('guide-content'), actions.menuArt()?.bubbles, photoUrl(LEVELS[0]) ?? homePhotoUrl());
+    $('guide-scroll').scrollTop = 0;
+    guide.classList.remove('hidden');
+  });
+  $('btn-guide-back').addEventListener('click', () => {
+    sfx.click();
+    showMap();
+  });
   $('btn-map-home').addEventListener('click', () => {
     sfx.click();
     showHome();
@@ -237,11 +247,25 @@ export function initUi(actions: UiActions): void {
 
   bus.on('ready', (e) => {
     // Explications pour les nouveaux joueurs (une seule fois).
-    const lesson = hud.classList.contains('hidden') ? null : lessonFor(e.levelIndex);
-    if (lesson) {
+    hideTips();
+    const tip = hud.classList.contains('hidden') ? null : tipFor(e.levelIndex);
+    if (tip === 'intro') {
       // La scène est encore en création : la pause est appliquée juste après.
       window.setTimeout(() => actions.pause(), 0);
-      showLesson(lesson, () => actions.resume());
+      const level = LEVELS[e.levelIndex];
+      showIntro(
+        {
+          target: level.objective.revealPercent,
+          photo: homePhotoUrl(),
+          bubble: actions.menuArt()?.bubbles[2],
+        },
+        () => {
+          actions.resume();
+          showAimHint();
+        },
+      );
+    } else if (tip === 'murs') {
+      showWallsTip();
     }
     if (!homeArtDone) {
       const art = actions.menuArt();
@@ -255,6 +279,8 @@ export function initUi(actions: UiActions): void {
   });
 
   bus.on('hud', (s) => {
+    // Premier tir joué : la main d'aide à la visée disparaît.
+    if (s.shots < LEVELS[levelIndex].shots) hideAimHint();
     $('hud-level').textContent = String(s.levelNumber);
     $('hud-shots').textContent = String(s.shots);
     shotsPill.classList.toggle('low', s.shots > 0 && s.shots <= 5);

@@ -994,98 +994,6 @@ body {
   opacity: 0.7;
 }
 
-/* ───────── Explications (premier niveau) ───────── */
-#tutorial {
-  position: absolute;
-  inset: 0;
-  z-index: 15;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: calc(var(--u) * 30);
-  animation: fade 0.3s ease-out;
-}
-
-#tutorial.dim {
-  background: rgba(10, 4, 8, 0.62);
-}
-
-#tutorial-spots {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.tut-spot {
-  position: absolute;
-  border: calc(var(--u) * 4) solid #ffd66b;
-  box-shadow: 0 0 calc(var(--u) * 30) rgba(255, 214, 107, 0.8);
-  animation: spot-pulse 1.4s ease-in-out infinite;
-}
-
-@keyframes spot-pulse {
-  50% { border-color: #fff3dc; }
-}
-
-.tutorial-card {
-  position: relative;
-  width: 100%;
-  max-width: calc(var(--u) * 620);
-  padding: calc(var(--u) * 30) calc(var(--u) * 36) calc(var(--u) * 32);
-  text-align: center;
-  background: linear-gradient(180deg, #3a1820 0%, #22100f 100%);
-  border: calc(var(--u) * 3) solid rgba(232, 196, 128, 0.7);
-  border-radius: calc(var(--u) * 30);
-  box-shadow: 0 calc(var(--u) * 20) calc(var(--u) * 50) rgba(0, 0, 0, 0.6);
-}
-
-.tutorial-card.at-top {
-  align-self: flex-start;
-  margin-top: calc(var(--u) * 150);
-}
-
-.tutorial-card.at-bottom {
-  align-self: flex-end;
-  margin-bottom: calc(var(--u) * 40);
-}
-
-.tutorial-count {
-  margin: 0;
-  font-size: calc(var(--u) * 20);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: var(--gold);
-  min-height: calc(var(--u) * 24);
-}
-
-.tutorial-card h3 {
-  margin: calc(var(--u) * 4) 0 calc(var(--u) * 14);
-  font-size: calc(var(--u) * 40);
-  font-weight: 700;
-  color: #fff3dc;
-}
-
-#tutorial-text {
-  margin: 0 0 calc(var(--u) * 28);
-  font-size: calc(var(--u) * 28);
-  font-weight: 500;
-  line-height: 1.4;
-  color: #fff6e6;
-}
-
-.tutorial-actions {
-  display: flex;
-  justify-content: center;
-  gap: calc(var(--u) * 18);
-}
-
-.tutorial-actions .btn {
-  height: calc(var(--u) * 80);
-  font-size: calc(var(--u) * 30);
-  padding: 0 calc(var(--u) * 40);
-}
-
 .link-btn {
   display: block;
   margin: calc(var(--u) * -10) auto calc(var(--u) * 28);
@@ -1098,11 +1006,6 @@ body {
   background: none;
   border: 0;
   cursor: pointer;
-}
-
-#tutorial-spots svg {
-  position: absolute;
-  inset: 0;
 }
 
 /* ───────── Classement ───────── */
@@ -1272,4 +1175,420 @@ body {
   font-size: calc(var(--u) * 21);
   text-align: center;
   opacity: 0.65;
+}
+
+/* ───────── Aide : carte de la première partie ───────── */
+#intro {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--u) * 30);
+  background: rgba(10, 4, 8, 0.6);
+  animation: fade 0.3s ease-out;
+}
+
+.intro-card {
+  width: 100%;
+  max-width: calc(var(--u) * 600);
+  padding: calc(var(--u) * 28) calc(var(--u) * 34) calc(var(--u) * 34);
+  text-align: center;
+  background: linear-gradient(180deg, #3a1820 0%, #22100f 100%);
+  border: calc(var(--u) * 3) solid rgba(232, 196, 128, 0.7);
+  border-radius: calc(var(--u) * 30);
+  box-shadow: 0 calc(var(--u) * 20) calc(var(--u) * 50) rgba(0, 0, 0, 0.6);
+}
+
+.intro-card h3 {
+  margin: 0 0 calc(var(--u) * 18);
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: calc(var(--u) * 66);
+  line-height: 1.1;
+  color: #f6e3bb;
+}
+
+.intro-line {
+  margin: calc(var(--u) * 10) 0 calc(var(--u) * 24);
+  font-size: calc(var(--u) * 27);
+  font-weight: 500;
+  line-height: 1.35;
+  color: #fff6e6;
+}
+
+.intro-line b,
+.intro-goal b {
+  color: var(--gold);
+}
+
+.intro-goal {
+  display: inline-block;
+  margin: 0 0 calc(var(--u) * 26);
+  padding: calc(var(--u) * 8) calc(var(--u) * 22);
+  font-size: calc(var(--u) * 26);
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: calc(var(--u) * 30);
+}
+
+/* Démonstration : 3 boules → photo */
+.demo-match {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 22);
+  height: calc(var(--u) * 130);
+}
+
+.demo-balls {
+  position: relative;
+  display: flex;
+}
+
+.ball {
+  width: calc(var(--u) * 68);
+  height: calc(var(--u) * 68);
+  margin: 0 calc(var(--u) * -6);
+}
+
+.ball.dot {
+  display: block;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, #4fa3ff 45%, #1a4fb0);
+}
+
+.demo-balls .ball {
+  animation: demo-pop 3s ease-in-out infinite;
+}
+
+.demo-balls .b3 {
+  animation-name: demo-arrive;
+}
+
+@keyframes demo-arrive {
+  0% { transform: translateX(calc(var(--u) * 90)); opacity: 0; }
+  20%, 40% { transform: translateX(0); opacity: 1; }
+  52% { transform: scale(1.35); opacity: 0; }
+  92% { transform: translateX(calc(var(--u) * 90)); opacity: 0; }
+  100% { transform: translateX(calc(var(--u) * 90)); opacity: 0; }
+}
+
+@keyframes demo-pop {
+  0%, 40% { transform: scale(1); opacity: 1; }
+  52% { transform: scale(1.35); opacity: 0; }
+  88% { transform: scale(0.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.demo-arrow {
+  font-size: calc(var(--u) * 44);
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.demo-photo {
+  position: relative;
+  width: calc(var(--u) * 120);
+  height: calc(var(--u) * 120);
+  overflow: hidden;
+  border: calc(var(--u) * 3) solid rgba(232, 196, 128, 0.8);
+  border-radius: calc(var(--u) * 14);
+}
+
+.demo-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.demo-fog {
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle at 50% 45%, rgba(120, 100, 190, 0.2) 0%, rgba(80, 64, 150, 0.95) 55%);
+  animation: demo-fog 3s ease-in-out infinite;
+}
+
+@keyframes demo-fog {
+  0%, 45% { opacity: 1; transform: scale(1); }
+  70%, 88% { opacity: 0; transform: scale(1.6); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Démonstration : visée */
+.demo-aim {
+  position: relative;
+  width: calc(var(--u) * 300);
+  height: calc(var(--u) * 177);
+  margin: calc(var(--u) * 10) auto 0;
+}
+
+.demo-aim svg {
+  width: 100%;
+  height: 100%;
+}
+
+.demo-board {
+  fill: rgba(0, 0, 0, 0.3);
+  stroke: rgba(232, 196, 128, 0.35);
+  stroke-width: 2;
+}
+
+.demo-path {
+  fill: none;
+  stroke: #fff3dc;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 2 10;
+  animation: demo-dash 1s linear infinite;
+}
+
+@keyframes demo-dash {
+  to { stroke-dashoffset: -12; }
+}
+
+.demo-target {
+  fill: rgba(255, 214, 107, 0.25);
+  stroke: #ffd66b;
+  stroke-width: 2.5;
+}
+
+.demo-cannon {
+  fill: #ffb21f;
+  stroke: #fff3dc;
+  stroke-width: 3;
+}
+
+.demo-hand {
+  position: absolute;
+  left: 58%;
+  bottom: calc(var(--u) * -14);
+  width: calc(var(--u) * 54);
+  animation: demo-swipe 2.4s ease-in-out infinite;
+}
+
+@keyframes demo-swipe {
+  0%, 100% { transform: translateX(calc(var(--u) * -40)); }
+  50% { transform: translateX(calc(var(--u) * 30)); }
+}
+
+.hand {
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: #fff3dc;
+  stroke: #5b1a22;
+  stroke-width: 2.6;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 calc(var(--u) * 4) calc(var(--u) * 6) rgba(0, 0, 0, 0.5));
+}
+
+/* ───────── Aide : main près du canon jusqu'au premier tir ───────── */
+#aim-hint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--u) * 330);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  animation: fade 0.4s ease-out;
+}
+
+.aim-hand {
+  width: calc(var(--u) * 76);
+  animation: aim-swipe 2.2s ease-in-out infinite;
+}
+
+@keyframes aim-swipe {
+  0%, 100% { transform: translate(calc(var(--u) * -110), 0) rotate(-8deg); }
+  50% { transform: translate(calc(var(--u) * 110), calc(var(--u) * -20)) rotate(8deg); }
+}
+
+#aim-hint p {
+  margin: calc(var(--u) * 10) 0 0;
+  padding: calc(var(--u) * 6) calc(var(--u) * 20);
+  font-size: calc(var(--u) * 26);
+  font-weight: 600;
+  color: #fff3dc;
+  background: rgba(20, 7, 11, 0.7);
+  border-radius: calc(var(--u) * 24);
+}
+
+/* ───────── Aide : bandeau (murs) ───────── */
+#tip-toast {
+  position: absolute;
+  left: calc(var(--u) * 30);
+  right: calc(var(--u) * 30);
+  top: calc(var(--u) * 150);
+  z-index: 6;
+  padding: calc(var(--u) * 16) calc(var(--u) * 24);
+  text-align: center;
+  pointer-events: none;
+  background: rgba(34, 16, 15, 0.92);
+  border: calc(var(--u) * 2) solid rgba(255, 214, 107, 0.8);
+  border-radius: calc(var(--u) * 22);
+  animation: toast 5s ease-in-out both;
+}
+
+#tip-toast b {
+  display: block;
+  font-size: calc(var(--u) * 28);
+  color: var(--gold);
+}
+
+#tip-toast span {
+  font-size: calc(var(--u) * 24);
+}
+
+@keyframes toast {
+  0% { opacity: 0; transform: translateY(calc(var(--u) * -20)); }
+  8%, 88% { opacity: 1; transform: none; }
+  100% { opacity: 0; }
+}
+
+/* ───────── Comment jouer ───────── */
+.guide-btn {
+  flex: none;
+  height: calc(var(--u) * 52);
+  padding: 0 calc(var(--u) * 18);
+  font-family: var(--font);
+  font-size: calc(var(--u) * 22);
+  font-weight: 700;
+  color: #4a2300;
+  cursor: pointer;
+  background: linear-gradient(180deg, #ffe58a 0%, #ffb21f 100%);
+  border: calc(var(--u) * 2) solid rgba(255, 255, 255, 0.6);
+  border-radius: calc(var(--u) * 26);
+}
+
+#guide-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  padding: calc(var(--u) * 20) calc(var(--u) * 24) calc(var(--u) * 60);
+}
+
+#guide-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.g-sec {
+  margin-bottom: calc(var(--u) * 22);
+  padding: calc(var(--u) * 22) calc(var(--u) * 26);
+  background: rgba(255, 255, 255, 0.06);
+  border: calc(var(--u) * 2) solid rgba(232, 196, 128, 0.3);
+  border-radius: calc(var(--u) * 24);
+}
+
+.g-sec h4 {
+  margin: 0 0 calc(var(--u) * 12);
+  font-size: calc(var(--u) * 32);
+  color: var(--gold);
+}
+
+.g-sec p {
+  margin: calc(var(--u) * 12) 0 0;
+  font-size: calc(var(--u) * 25);
+  line-height: 1.45;
+  color: #fff6e6;
+}
+
+.g-visual {
+  display: flex;
+  justify-content: center;
+}
+
+.g-visual .demo-aim {
+  margin-top: 0;
+}
+
+.g-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--u) * 10);
+  min-height: calc(var(--u) * 80);
+}
+
+.g-ball {
+  width: calc(var(--u) * 62);
+  height: calc(var(--u) * 62);
+}
+
+.g-ball.dot {
+  display: block;
+  border-radius: 50%;
+}
+
+.g-eq {
+  margin: 0 calc(var(--u) * 10);
+  font-size: calc(var(--u) * 36);
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.g-pop {
+  font-size: calc(var(--u) * 50);
+}
+
+.g-fall .g-ball:nth-child(2) {
+  transform: translateY(calc(var(--u) * 18));
+}
+
+.g-fall .g-ball:nth-child(3) {
+  transform: translateY(calc(var(--u) * 36));
+}
+
+.g-wall {
+  display: block;
+  width: calc(var(--u) * 150);
+  height: calc(var(--u) * 22);
+  border-radius: calc(var(--u) * 11);
+  background: linear-gradient(180deg, #ffe9a6, #d18a1a);
+  box-shadow: 0 0 calc(var(--u) * 12) rgba(255, 214, 107, 0.6);
+}
+
+.g-timer {
+  display: grid;
+  place-items: center;
+  width: calc(var(--u) * 60);
+  height: calc(var(--u) * 60);
+  margin-left: calc(var(--u) * 20);
+  font-size: calc(var(--u) * 30);
+  font-weight: 700;
+  border: calc(var(--u) * 5) solid var(--gold);
+  border-radius: 50%;
+}
+
+.g-shots {
+  padding: calc(var(--u) * 8) calc(var(--u) * 20);
+  font-size: calc(var(--u) * 30);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: calc(var(--u) * 26);
+}
+
+.g-line {
+  display: block;
+  height: 0;
+  width: calc(var(--u) * 180);
+  margin-left: calc(var(--u) * 20);
+  border-top: calc(var(--u) * 4) dashed rgba(255, 255, 255, 0.6);
+}
+
+.g-stars {
+  font-size: calc(var(--u) * 54);
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+
+.g-visual .hand {
+  width: calc(var(--u) * 60);
 }

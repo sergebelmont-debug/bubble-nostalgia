@@ -79,7 +79,7 @@
               <button id="btn-board" class="btn sepia hidden" type="button">Classement</button>
             </div>
             <p id="home-progress" class="home-progress"></p>
-            <p class="version">Version 0.7</p>
+            <p class="version">Version 0.8</p>
           </div>
         </div>
       </section>
@@ -110,6 +110,7 @@
             <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5" /><path d="M6.5 10v9h11v-9" /></svg>
           </button>
           <h3>Niveaux</h3>
+          <button id="btn-guide" class="guide-btn" type="button">? Comment jouer</button>
           <div class="pill"><span class="star-ico">★</span><b id="map-stars">0</b></div>
         </header>
         <div id="map-scroll">
@@ -129,7 +130,6 @@
             <input id="sfx-volume" type="range" min="0" max="100" step="5" value="80" />
           </label>
           <p class="setting-note">À 0 %, le son correspondant est coupé.</p>
-          <button id="btn-replay-tips" class="link-btn" type="button">Revoir les explications du jeu</button>
           <button id="btn-settings-close" class="btn primary" type="button">Fermer</button>
         </div>
       </section>
@@ -166,17 +166,22 @@
         </div>
       </section>
 
-      <section id="tutorial" class="hidden" aria-live="polite">
-        <div id="tutorial-spots"></div>
-        <div id="tutorial-card" class="tutorial-card" role="dialog" aria-labelledby="tutorial-title">
-          <p id="tutorial-count" class="tutorial-count"></p>
-          <h3 id="tutorial-title"></h3>
-          <p id="tutorial-text"></p>
-          <div class="tutorial-actions">
-            <button id="btn-tutorial-skip" class="btn secondary compact" type="button">Passer</button>
-            <button id="btn-tutorial-next" class="btn primary" type="button">Suivant</button>
-          </div>
-        </div>
+      <section id="intro" class="hidden"></section>
+      <div id="aim-hint" class="hidden" aria-hidden="true">
+        <div class="aim-hand"></div>
+        <p>Glissez puis relâchez</p>
+      </div>
+      <div id="tip-toast" class="hidden" role="status"></div>
+
+      <section id="screen-guide" class="overlay collection guide hidden">
+        <header class="map-head">
+          <button id="btn-guide-back" class="icon-btn" type="button" aria-label="Retour à la carte des niveaux">
+            <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg>
+          </button>
+          <h3>Comment jouer</h3>
+          <span class="head-spacer"></span>
+        </header>
+        <div id="guide-scroll"><div id="guide-content"></div></div>
       </section>
 
       <section id="overlay-end" class="overlay sheet hidden">
