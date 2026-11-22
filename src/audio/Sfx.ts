@@ -9,15 +9,21 @@ class SfxEngine {
   private ctx: AudioContext | null = null;
   private master: GainNode | null = null;
   private noiseBuf: AudioBuffer | null = null;
-  private _muted = false;
+  private _volume = 0.8;
 
-  get muted(): boolean {
-    return this._muted;
+  /** Volume des bruitages (0–1). */
+  get volume(): number {
+    return this._volume;
   }
 
-  setMuted(muted: boolean): void {
-    this._muted = muted;
-    if (this.master && this.ctx) this.master.gain.setTargetAtTime(muted ? 0 : 0.9, this.ctx.currentTime, 0.02);
+  /** Contexte audio partagé avec la musique (null avant le premier geste). */
+  get audioContext(): AudioContext | null {
+    return this.ctx;
+  }
+
+  setVolume(volume: number): void {
+    this._volume = Math.max(0, Math.min(1, volume));
+    if (this.master && this.ctx) this.master.gain.setTargetAtTime(this._volume, this.ctx.currentTime, 0.02);
   }
 
   /** À appeler depuis un geste utilisateur (toucher / clic). */
@@ -28,7 +34,7 @@ class SfxEngine {
         if (!Ctor) return;
         this.ctx = new Ctor();
         this.master = this.ctx.createGain();
-        this.master.gain.value = this._muted ? 0 : 0.9;
+        this.master.gain.value = this._volume;
         this.master.connect(this.ctx.destination);
         const len = this.ctx.sampleRate;
         this.noiseBuf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
@@ -50,7 +56,7 @@ class SfxEngine {
   }
 
   private tone(freq: number, dur: number, type: OscillatorType, vol: number, slideTo = freq, delay = 0): void {
-    if (!this.ctx || !this.master || this._muted) return;
+    if (!this.ctx || !this.master || this._volume <= 0) return;
     const t = this.ctx.currentTime + delay;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
@@ -66,7 +72,7 @@ class SfxEngine {
   }
 
   private noise(dur: number, vol: number, from: number, to: number, type: BiquadFilterType = 'bandpass', delay = 0, q = 1): void {
-    if (!this.ctx || !this.master || !this.noiseBuf || this._muted) return;
+    if (!this.ctx || !this.master || !this.noiseBuf || this._volume <= 0) return;
     const t = this.ctx.currentTime + delay;
     const src = this.ctx.createBufferSource();
     src.buffer = this.noiseBuf;

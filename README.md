@@ -89,7 +89,8 @@ Les musiques sont dans `public/assets/audio/music/` (MP3). Le menu utilise
 `MENU_MUSIC` et chaque niveau son champ `music` dans
 [src/data/levels.ts](src/data/levels.ts). Pour convertir un fichier WAV :
 `ffmpeg -i chanson.wav -af loudnorm=I=-18:TP=-1.5:LRA=11 -ar 44100 -b:a 96k chanson.mp3`.
-Le joueur peut couper la musique (bouton note) indépendamment des bruitages.
+Le joueur règle séparément le volume de la musique et des effets sonores
+(bouton Réglages, roue dentée, sur l'accueil et pendant les parties).
 
 ## Collection
 

@@ -6,12 +6,13 @@ export interface SaveData {
   unlocked: number;
   /** Meilleur score et étoiles par identifiant de niveau. */
   best: Record<string, { score: number; stars: number }>;
-  muted: boolean;
-  /** Musique coupée (indépendamment des bruitages). */
-  musicMuted: boolean;
+  /** Volume des bruitages (0–1). */
+  sfxVolume: number;
+  /** Volume de la musique (0–1). */
+  musicVolume: number;
 }
 
-const DEFAULTS: SaveData = { unlocked: 0, best: {}, muted: false, musicMuted: false };
+const DEFAULTS: SaveData = { unlocked: 0, best: {}, sfxVolume: 0.8, musicVolume: 0.6 };
 
 let cache: SaveData | null = null;
 
@@ -20,7 +21,15 @@ export function loadSave(): SaveData {
   let data: SaveData = { ...DEFAULTS, best: {} };
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) data = { ...data, ...(JSON.parse(raw) as Partial<SaveData>) };
+    if (raw) {
+      const old = JSON.parse(raw) as Partial<SaveData> & { muted?: boolean; musicMuted?: boolean };
+      data = { ...data, ...old };
+      // Anciennes sauvegardes : son ou musique « coupé » devient volume 0.
+      if (old.sfxVolume === undefined && old.muted) data.sfxVolume = 0;
+      if (old.musicVolume === undefined && old.musicMuted) data.musicVolume = 0;
+      delete (data as { muted?: boolean }).muted;
+      delete (data as { musicMuted?: boolean }).musicMuted;
+    }
   } catch {
     /* stockage indisponible : on joue sans sauvegarde */
   }

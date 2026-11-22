@@ -1,8 +1,14 @@
+import { sfx } from './Sfx';
+
 /**
  * MUSIQUE
  * -------
  * Une piste à la fois, lue en boucle par un élément <audio> (lecture en
  * continu, sans tout charger en mémoire). Changement de piste en fondu.
+ *
+ * Le son passe par le circuit Web Audio des bruitages (un nœud de volume par
+ * piste, puis un volume général de la musique) : c'est la seule façon de
+ * régler le volume sur iPhone, où le volume d'un élément <audio> est ignoré.
  *
  * Les navigateurs mobiles interdisent de lancer un son avant le premier geste
  * du joueur : la piste demandée est mémorisée et démarre au premier toucher.
@@ -11,19 +17,26 @@
  * que le nom du fichier (voir data/levels.ts).
  */
 const MUSIC_DIR = 'assets/audio/music/';
-const VOLUME = 0.55;
-const FADE_MS = 700;
+const FADE_S = 0.7;
+
+interface Track {
+  el: HTMLAudioElement;
+  gain: GainNode | null;
+  /** Niveau du fondu (0–1), utilisé quand Web Audio est indisponible. */
+  fade: number;
+}
 
 class MusicPlayer {
-  private audio: HTMLAudioElement | null = null;
+  private track: Track | null = null;
   private file: string | null = null;
   private unlocked = false;
   private hidden = false;
-  private _muted = false;
-  private fadeTimer = 0;
+  private _volume = 0.6;
+  private out: GainNode | null = null;
 
-  get muted(): boolean {
-    return this._muted;
+  /** Volume de la musique (0–1). */
+  get volume(): number {
+    return this._volume;
   }
 
   /** Piste à jouer (nom de fichier), ou null pour le silence. */
@@ -33,30 +46,27 @@ class MusicPlayer {
       return;
     }
     this.file = file;
-    const old = this.audio;
-    this.audio = null;
+    const old = this.track;
+    this.track = null;
     if (old) this.fadeOut(old);
     if (!file) return;
-    const audio = new Audio(`${import.meta.env.BASE_URL}${MUSIC_DIR}${file}`);
-    audio.loop = true;
-    audio.preload = 'auto';
-    audio.volume = 0;
-    this.audio = audio;
+    const el = new Audio(`${import.meta.env.BASE_URL}${MUSIC_DIR}${file}`);
+    el.loop = true;
+    el.preload = 'auto';
+    this.track = { el, gain: null, fade: 0 };
+    this.applyFallbackVolume(this.track);
     this.sync();
   }
 
-  /** État résumé pour les tests automatisés. */
-  debugState() {
-    const a = this.audio;
-    return { file: this.file, playing: Boolean(a && !a.paused), time: a ? Math.round(a.currentTime * 10) / 10 : 0, volume: a ? Math.round(a.volume * 100) / 100 : 0, unlocked: this.unlocked, muted: this._muted };
-  }
-
-  setMuted(muted: boolean): void {
-    this._muted = muted;
+  setVolume(volume: number): void {
+    this._volume = Math.max(0, Math.min(1, volume));
+    const ctx = sfx.audioContext;
+    if (this.out && ctx) this.out.gain.setTargetAtTime(this._volume, ctx.currentTime, 0.03);
+    if (this.track) this.applyFallbackVolume(this.track);
     this.sync();
   }
 
-  /** À appeler depuis un geste du joueur (toucher / clic). */
+  /** À appeler depuis un geste du joueur (toucher / clic), après sfx.unlock(). */
   unlock(): void {
     if (this.unlocked) return;
     this.unlocked = true;
@@ -74,16 +84,56 @@ class MusicPlayer {
     this.sync();
   }
 
+  /** État résumé pour les tests automatisés. */
+  debugState() {
+    const t = this.track;
+    return {
+      file: this.file,
+      playing: Boolean(t && !t.el.paused),
+      time: t ? Math.round(t.el.currentTime * 10) / 10 : 0,
+      volume: this._volume,
+      webAudio: Boolean(t?.gain),
+      gain: t?.gain ? Math.round(t.gain.gain.value * 100) / 100 : null,
+      out: this.out ? Math.round(this.out.gain.value * 100) / 100 : null,
+      unlocked: this.unlocked,
+    };
+  }
+
+  /** Branche la piste sur le circuit Web Audio (une seule fois par piste). */
+  private connect(t: Track): void {
+    const ctx = sfx.audioContext;
+    if (t.gain || !ctx) return;
+    try {
+      if (!this.out) {
+        this.out = ctx.createGain();
+        this.out.gain.value = this._volume;
+        this.out.connect(ctx.destination);
+      }
+      const src = ctx.createMediaElementSource(t.el);
+      t.gain = ctx.createGain();
+      t.gain.gain.value = 0;
+      src.connect(t.gain).connect(this.out);
+      t.el.volume = 1;
+    } catch {
+      t.gain = null;
+    }
+  }
+
+  private applyFallbackVolume(t: Track): void {
+    if (!t.gain) t.el.volume = this._volume * t.fade;
+  }
+
   private sync(): void {
-    const a = this.audio;
-    if (!a) return;
-    if (!this.unlocked || this._muted || this.hidden) {
-      a.pause();
+    const t = this.track;
+    if (!t) return;
+    if (!this.unlocked || this._volume <= 0 || this.hidden) {
+      t.el.pause();
       return;
     }
-    if (a.paused) {
-      a.play().then(
-        () => this.fadeIn(a),
+    this.connect(t);
+    if (t.el.paused) {
+      t.el.play().then(
+        () => this.fadeIn(t),
         () => {
           /* lecture refusée par le navigateur : nouvel essai au prochain geste */
           this.unlocked = false;
@@ -92,32 +142,51 @@ class MusicPlayer {
     }
   }
 
-  private fadeIn(a: HTMLAudioElement): void {
-    window.clearInterval(this.fadeTimer);
-    const start = performance.now();
-    const from = a.volume;
-    this.fadeTimer = window.setInterval(() => {
-      const p = Math.min(1, (performance.now() - start) / FADE_MS);
-      a.volume = from + (VOLUME - from) * p;
-      if (p >= 1 || a !== this.audio) window.clearInterval(this.fadeTimer);
-    }, 40);
-  }
-
-  private fadeOut(a: HTMLAudioElement): void {
-    if (a.paused) {
-      a.removeAttribute('src');
+  private fadeIn(t: Track): void {
+    const ctx = sfx.audioContext;
+    if (t.gain && ctx) {
+      const g = t.gain.gain;
+      g.cancelScheduledValues(ctx.currentTime);
+      g.setValueAtTime(g.value, ctx.currentTime);
+      g.linearRampToValueAtTime(1, ctx.currentTime + FADE_S);
       return;
     }
+    this.animateFade(t, 1);
+  }
+
+  private fadeOut(t: Track): void {
+    const stop = (): void => {
+      t.el.pause();
+      t.el.removeAttribute('src');
+      t.el.load();
+    };
+    if (t.el.paused) {
+      stop();
+      return;
+    }
+    const ctx = sfx.audioContext;
+    if (t.gain && ctx) {
+      const g = t.gain.gain;
+      g.cancelScheduledValues(ctx.currentTime);
+      g.setValueAtTime(g.value, ctx.currentTime);
+      g.linearRampToValueAtTime(0, ctx.currentTime + FADE_S);
+      window.setTimeout(stop, FADE_S * 1000 + 60);
+      return;
+    }
+    this.animateFade(t, 0, stop);
+  }
+
+  /** Fondu sans Web Audio (navigateurs anciens). */
+  private animateFade(t: Track, to: number, done?: () => void): void {
     const start = performance.now();
-    const from = a.volume;
+    const from = t.fade;
     const timer = window.setInterval(() => {
-      const p = Math.min(1, (performance.now() - start) / FADE_MS);
-      a.volume = from * (1 - p);
+      const p = Math.min(1, (performance.now() - start) / (FADE_S * 1000));
+      t.fade = from + (to - from) * p;
+      this.applyFallbackVolume(t);
       if (p >= 1) {
         window.clearInterval(timer);
-        a.pause();
-        a.removeAttribute('src');
-        a.load();
+        done?.();
       }
     }, 40);
   }

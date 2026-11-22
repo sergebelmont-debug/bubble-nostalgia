@@ -21,8 +21,9 @@
           <div class="pill"><span class="lbl">Niveau</span><b id="hud-level">1</b></div>
           <div class="score"><span class="lbl">Score</span><b id="hud-score">0</b></div>
           <div class="pill shots" title="Tirs restants"><i class="orb"></i><b id="hud-shots">0</b></div>
-          <button id="btn-music" class="icon-btn music-btn" type="button" aria-label="Couper ou rétablir la musique"></button>
-          <button id="btn-sound" class="icon-btn" type="button" aria-label="Couper ou rétablir les bruitages"></button>
+          <button id="btn-settings" class="icon-btn" type="button" aria-label="Réglages du son">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" /><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3 5.5 5.5" /><circle cx="12" cy="12" r="6.4" /></svg>
+          </button>
           <button id="btn-restart" class="icon-btn" type="button" aria-label="Recommencer le niveau">
             <svg viewBox="0 0 24 24"><path d="M12 5a7 7 0 1 1-6.6 4.7" /><path d="M5 4v5.5h5.5" /></svg>
           </button>
@@ -43,7 +44,9 @@
         <div id="home-photo" class="home-photo"></div>
         <div id="home-bubbles" class="home-art home-bubbles" aria-hidden="true"></div>
         <div id="home-cannon" class="home-art home-cannon" aria-hidden="true"></div>
-        <button id="btn-home-music" class="icon-btn music-btn home-music" type="button" aria-label="Couper ou rétablir la musique"></button>
+        <button id="btn-home-settings" class="icon-btn home-settings" type="button" aria-label="Réglages du son">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" /><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3 5.5 5.5" /><circle cx="12" cy="12" r="6.4" /></svg>
+        </button>
         <div class="start-card">
           <div class="home-top">
             <p class="artist">Serge Belmont</p>
@@ -56,7 +59,7 @@
               Collection <span id="home-collection" class="count"></span>
             </button>
             <p id="home-progress" class="home-progress"></p>
-            <p class="version">Version 0.5</p>
+            <p class="version">Version 0.6</p>
           </div>
         </div>
       </section>
@@ -91,6 +94,22 @@
         </header>
         <div id="map-scroll">
           <div id="map-path"></div>
+        </div>
+      </section>
+
+      <section id="screen-settings" class="overlay settings hidden" role="dialog" aria-labelledby="settings-title">
+        <div class="settings-card">
+          <h3 id="settings-title">Réglages</h3>
+          <label class="setting">
+            <span class="setting-head"><span>Musique</span><b id="music-value">60 %</b></span>
+            <input id="music-volume" type="range" min="0" max="100" step="5" value="60" />
+          </label>
+          <label class="setting">
+            <span class="setting-head"><span>Effets sonores</span><b id="sfx-value">80 %</b></span>
+            <input id="sfx-volume" type="range" min="0" max="100" step="5" value="80" />
+          </label>
+          <p class="setting-note">À 0 %, le son correspondant est coupé.</p>
+          <button id="btn-settings-close" class="btn primary" type="button">Fermer</button>
         </div>
       </section>
 

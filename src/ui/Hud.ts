@@ -23,14 +23,6 @@ export interface UiActions {
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 
-const ICON_SOUND_ON =
-  '<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" /><path d="M15.5 9a4.2 4.2 0 0 1 0 6" /><path d="M18 6.5a7.6 7.6 0 0 1 0 11" /></svg>';
-const ICON_MUSIC_ON =
-  '<svg viewBox="0 0 24 24"><path d="M9 17.5V6l10-2v11.5" /><circle cx="6.5" cy="17.5" r="2.5" /><circle cx="16.5" cy="15.5" r="2.5" /></svg>';
-const ICON_MUSIC_OFF =
-  '<svg viewBox="0 0 24 24"><path d="M9 17.5V6l10-2v11.5" /><circle cx="6.5" cy="17.5" r="2.5" /><circle cx="16.5" cy="15.5" r="2.5" /><path d="M3.5 3.5l17 17" /></svg>';
-const ICON_SOUND_OFF =
-  '<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" /><path d="M16 9.5l5 5" /><path d="M21 9.5l-5 5" /></svg>';
 
 export function initUi(actions: UiActions): void {
   const hud = $('hud');
@@ -41,7 +33,7 @@ export function initUi(actions: UiActions): void {
   const viewer = $('photo-viewer');
   const scoreEl = $('hud-score');
   const shotsPill = $('hud-shots').parentElement!;
-  const soundBtn = $<HTMLButtonElement>('btn-sound');
+  const settings = $('screen-settings');
   let levelIndex = 0;
   let lastScore = 0;
   let homeArtDone = false;
@@ -49,7 +41,7 @@ export function initUi(actions: UiActions): void {
   $('home-photo').style.backgroundImage = `url("${homePhotoUrl()}")`;
 
   const hideAll = (): void => {
-    for (const el of [hud, home, map, end, collection, viewer]) el.classList.add('hidden');
+    for (const el of [hud, home, map, end, collection, viewer, settings]) el.classList.add('hidden');
   };
 
   const showHome = (): void => {
@@ -113,47 +105,69 @@ export function initUi(actions: UiActions): void {
     actions.startLevel(Math.max(0, Math.min(index, LEVELS.length - 1)));
   };
 
-  const renderSound = (): void => {
-    soundBtn.innerHTML = sfx.muted ? ICON_SOUND_OFF : ICON_SOUND_ON;
-    soundBtn.setAttribute('aria-pressed', String(sfx.muted));
+  // ── Réglages du son : deux curseurs, appliqués et mémorisés immédiatement.
+  const musicInput = $<HTMLInputElement>('music-volume');
+  const sfxInput = $<HTMLInputElement>('sfx-volume');
+  const pct = (v: number): number => Math.round(v * 100);
+  const renderVolumes = (): void => {
+    musicInput.value = String(pct(music.volume));
+    sfxInput.value = String(pct(sfx.volume));
+    $('music-value').textContent = `${pct(music.volume)} %`;
+    $('sfx-value').textContent = `${pct(sfx.volume)} %`;
+    for (const input of [musicInput, sfxInput]) input.style.setProperty('--fill', `${input.value}%`);
   };
-  sfx.setMuted(loadSave().muted);
-  renderSound();
+  const initial = loadSave();
+  sfx.setVolume(initial.sfxVolume);
+  music.setVolume(initial.musicVolume);
+  renderVolumes();
 
-  const musicBtns = [$<HTMLButtonElement>('btn-music'), $<HTMLButtonElement>('btn-home-music')];
-  const renderMusic = (): void => {
-    for (const b of musicBtns) {
-      b.innerHTML = music.muted ? ICON_MUSIC_OFF : ICON_MUSIC_ON;
-      b.setAttribute('aria-pressed', String(music.muted));
+  musicInput.addEventListener('input', () => {
+    music.setVolume(Number(musicInput.value) / 100);
+    renderVolumes();
+  });
+  musicInput.addEventListener('change', () => writeSave({ musicVolume: music.volume }));
+  let lastPreview = 0;
+  sfxInput.addEventListener('input', () => {
+    sfx.setVolume(Number(sfxInput.value) / 100);
+    renderVolumes();
+    // Petit son d'essai pour entendre le nouveau volume.
+    const now = performance.now();
+    if (now - lastPreview > 120) {
+      lastPreview = now;
+      sfx.pop(2);
     }
+  });
+  sfxInput.addEventListener('change', () => writeSave({ sfxVolume: sfx.volume }));
+
+  let pausedForSettings = false;
+  const openSettings = (): void => {
+    sfx.click();
+    renderVolumes();
+    pausedForSettings = !hud.classList.contains('hidden');
+    if (pausedForSettings) actions.pause();
+    settings.classList.remove('hidden');
   };
-  music.setMuted(loadSave().musicMuted);
-  renderMusic();
-  for (const b of musicBtns) {
-    b.addEventListener('click', () => {
-      sfx.unlock();
-      music.unlock();
-      music.setMuted(!music.muted);
-      writeSave({ musicMuted: music.muted });
-      renderMusic();
-      sfx.click();
-    });
-  }
+  const closeSettings = (): void => {
+    settings.classList.add('hidden');
+    writeSave({ musicVolume: music.volume, sfxVolume: sfx.volume });
+    if (pausedForSettings) actions.resume();
+    pausedForSettings = false;
+    sfx.click();
+  };
+  $('btn-settings').addEventListener('click', openSettings);
+  $('btn-home-settings').addEventListener('click', openSettings);
+  $('btn-settings-close').addEventListener('click', closeSettings);
+  settings.addEventListener('click', (e) => {
+    if (e.target === settings) closeSettings();
+  });
+
   // Les navigateurs n'autorisent le son qu'après un premier geste du joueur.
   const firstGesture = (): void => {
-    music.unlock();
     sfx.unlock();
+    music.unlock();
   };
   window.addEventListener('pointerdown', firstGesture, { capture: true });
   window.addEventListener('keydown', firstGesture, { capture: true });
-
-  soundBtn.addEventListener('click', () => {
-    sfx.unlock();
-    sfx.setMuted(!sfx.muted);
-    writeSave({ muted: sfx.muted });
-    renderSound();
-    sfx.click();
-  });
 
   $('btn-play').addEventListener('click', () => {
     sfx.unlock();

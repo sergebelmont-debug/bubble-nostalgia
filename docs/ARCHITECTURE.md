@@ -79,7 +79,7 @@ communiquent que par le bus d'événements (`app/bus.ts`).
 
 ## Limites connues du prototype
 
-- Musique et bruitages se coupent séparément ; pas encore de réglage de volume.
+- Volumes musique et effets sonores réglables séparément (pas de volume général).
 - Testé dans un navigateur de bureau (format mobile simulé), pas encore sur
   de vrais téléphones ni dans le navigateur intégré de Facebook.
 - La progression est enregistrée sur l'appareil uniquement.
