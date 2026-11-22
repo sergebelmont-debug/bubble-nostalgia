@@ -1,7 +1,8 @@
 import { bus, type LevelResult } from '../app/bus';
+import { music } from '../audio/Music';
 import { sfx } from '../audio/Sfx';
 import { DESIGN_W } from '../config/gameConfig';
-import { LEVELS } from '../data/levels';
+import { LEVELS, MENU_MUSIC } from '../data/levels';
 import type { MenuArt } from '../render/menuArt';
 import { homePhotoUrl } from '../services/PhotoService';
 import { loadSave, writeSave } from '../services/SaveService';
@@ -24,6 +25,10 @@ const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getEl
 
 const ICON_SOUND_ON =
   '<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" /><path d="M15.5 9a4.2 4.2 0 0 1 0 6" /><path d="M18 6.5a7.6 7.6 0 0 1 0 11" /></svg>';
+const ICON_MUSIC_ON =
+  '<svg viewBox="0 0 24 24"><path d="M9 17.5V6l10-2v11.5" /><circle cx="6.5" cy="17.5" r="2.5" /><circle cx="16.5" cy="15.5" r="2.5" /></svg>';
+const ICON_MUSIC_OFF =
+  '<svg viewBox="0 0 24 24"><path d="M9 17.5V6l10-2v11.5" /><circle cx="6.5" cy="17.5" r="2.5" /><circle cx="16.5" cy="15.5" r="2.5" /><path d="M3.5 3.5l17 17" /></svg>';
 const ICON_SOUND_OFF =
   '<svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" /><path d="M16 9.5l5 5" /><path d="M21 9.5l-5 5" /></svg>';
 
@@ -55,6 +60,7 @@ export function initUi(actions: UiActions): void {
       save.unlocked > 0 ? `★ ${stars} · Niveau ${Math.min(save.unlocked + 1, LEVELS.length)} sur ${LEVELS.length}` : '';
     $('home-collection').textContent = `${collectedCount()} / ${LEVELS.length}`;
     home.classList.remove('hidden');
+    music.play(MENU_MUSIC);
     actions.resume();
   };
 
@@ -80,6 +86,7 @@ export function initUi(actions: UiActions): void {
       onLocked: () => sfx.bounce(),
     });
     $('collection-scroll').scrollTop = 0;
+    music.play(MENU_MUSIC);
     collection.classList.remove('hidden');
   };
 
@@ -87,6 +94,7 @@ export function initUi(actions: UiActions): void {
     hideAll();
     actions.pause();
     map.classList.remove('hidden');
+    music.play(MENU_MUSIC);
     $('map-stars').textContent = `${totalStars()} / ${LEVELS.length * 3}`;
     const scroll = $('map-scroll');
     const currentY = renderMap($('map-path'), {
@@ -101,6 +109,7 @@ export function initUi(actions: UiActions): void {
     sfx.click();
     hideAll();
     hud.classList.remove('hidden');
+    music.play(LEVELS[Math.max(0, Math.min(index, LEVELS.length - 1))].music);
     actions.startLevel(Math.max(0, Math.min(index, LEVELS.length - 1)));
   };
 
@@ -110,6 +119,33 @@ export function initUi(actions: UiActions): void {
   };
   sfx.setMuted(loadSave().muted);
   renderSound();
+
+  const musicBtns = [$<HTMLButtonElement>('btn-music'), $<HTMLButtonElement>('btn-home-music')];
+  const renderMusic = (): void => {
+    for (const b of musicBtns) {
+      b.innerHTML = music.muted ? ICON_MUSIC_OFF : ICON_MUSIC_ON;
+      b.setAttribute('aria-pressed', String(music.muted));
+    }
+  };
+  music.setMuted(loadSave().musicMuted);
+  renderMusic();
+  for (const b of musicBtns) {
+    b.addEventListener('click', () => {
+      sfx.unlock();
+      music.unlock();
+      music.setMuted(!music.muted);
+      writeSave({ musicMuted: music.muted });
+      renderMusic();
+      sfx.click();
+    });
+  }
+  // Les navigateurs n'autorisent le son qu'après un premier geste du joueur.
+  const firstGesture = (): void => {
+    music.unlock();
+    sfx.unlock();
+  };
+  window.addEventListener('pointerdown', firstGesture, { capture: true });
+  window.addEventListener('keydown', firstGesture, { capture: true });
 
   soundBtn.addEventListener('click', () => {
     sfx.unlock();

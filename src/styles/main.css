@@ -873,3 +873,17 @@ body {
     animation: none;
   }
 }
+
+/* Bouton musique de l'accueil */
+.home-music {
+  position: absolute;
+  bottom: calc(var(--u) * 40);
+  right: calc(var(--u) * 40);
+  width: calc(var(--u) * 72);
+  height: calc(var(--u) * 72);
+  padding: calc(var(--u) * 17);
+  background: rgba(20, 7, 11, 0.6);
+  border-color: rgba(232, 196, 128, 0.6);
+  color: #f6e3bb;
+  z-index: 2;
+}

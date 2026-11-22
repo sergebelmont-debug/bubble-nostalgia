@@ -83,6 +83,14 @@ Le jeu est alors accessible sur
 Aucun pour le moment. Le classement communautaire et la sauvegarde en ligne
 (prévus avec Supabase) nécessiteront la création d'un projet Supabase.
 
+## Musique
+
+Les musiques sont dans `public/assets/audio/music/` (MP3). Le menu utilise
+`MENU_MUSIC` et chaque niveau son champ `music` dans
+[src/data/levels.ts](src/data/levels.ts). Pour convertir un fichier WAV :
+`ffmpeg -i chanson.wav -af loudnorm=I=-18:TP=-1.5:LRA=11 -ar 44100 -b:a 96k chanson.mp3`.
+Le joueur peut couper la musique (bouton note) indépendamment des bruitages.
+
 ## Collection
 
 L'écran « Collection » (menu d'accueil) affiche les photos des niveaux terminés ;

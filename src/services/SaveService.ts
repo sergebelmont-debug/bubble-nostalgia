@@ -7,9 +7,11 @@ export interface SaveData {
   /** Meilleur score et étoiles par identifiant de niveau. */
   best: Record<string, { score: number; stars: number }>;
   muted: boolean;
+  /** Musique coupée (indépendamment des bruitages). */
+  musicMuted: boolean;
 }
 
-const DEFAULTS: SaveData = { unlocked: 0, best: {}, muted: false };
+const DEFAULTS: SaveData = { unlocked: 0, best: {}, muted: false, musicMuted: false };
 
 let cache: SaveData | null = null;
 

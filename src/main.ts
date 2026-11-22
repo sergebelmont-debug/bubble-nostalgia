@@ -4,6 +4,7 @@ import '@fontsource/great-vibes/400.css';
 import './styles/main.css';
 import Phaser from 'phaser';
 import { view } from './app/view';
+import { music } from './audio/Music';
 import { sfx } from './audio/Sfx';
 import { DESIGN_W, MAX_H, MIN_H } from './config/gameConfig';
 import { menuArt } from './render/menuArt';
@@ -77,10 +78,17 @@ async function boot(): Promise<void> {
 
   // Interruptions (appel, changement d'onglet) : le son est suspendu.
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) sfx.suspend();
-    else sfx.resume();
+    if (document.hidden) {
+      sfx.suspend();
+      music.suspend();
+    } else {
+      sfx.resume();
+      music.resume();
+    }
   });
   document.addEventListener('contextmenu', (e) => e.preventDefault());
 }
+
+if (import.meta.env.DEV) (window as unknown as { __music: typeof music }).__music = music;
 
 void boot();

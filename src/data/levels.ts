@@ -16,6 +16,9 @@ import type { WallDef } from '../core/walls';
 /** Photographie affichée en fond du menu d'accueil (nom de fichier dans public/assets/photos/levels/). */
 export const HOME_PHOTO = 'serge-belmont-01.webp';
 
+/** Musique du menu (nom de fichier dans public/assets/audio/music/). */
+export const MENU_MUSIC = 'menu.mp3';
+
 export type Difficulty ='facile' | 'moyen' | 'difficile' | 'expert';
 
 /** Forme de la disposition initiale des boules. */
@@ -34,6 +37,8 @@ export interface LevelDef {
     focusX?: number;
     focusY?: number;
   };
+  /** Musique du niveau (nom de fichier dans public/assets/audio/music/), ou null. */
+  music: string | null;
   difficulty: Difficulty;
   /** Nombre de tirs accordés. */
   shots: number;
@@ -70,6 +75,8 @@ type LevelInput = Pick<LevelDef, 'title' | 'difficulty' | 'shots' | 'colors' | '
   target: number;
   /** Nom du fichier photo (dans public/assets/photos/levels/), ou rien tant qu'elle n'est pas fournie. */
   photo?: string;
+  /** Nom du fichier musique (dans public/assets/audio/music/). */
+  music?: string;
   /** Nom du fichier miniature (dans public/assets/photos/thumbnails/). Défaut : même nom que la photo. */
   thumbnail?: string;
   description?: string;
@@ -92,6 +99,7 @@ function defineLevels(list: LevelInput[]): LevelDef[] {
       focusX: l.focusX,
       focusY: l.focusY,
     },
+    music: l.music ?? null,
     difficulty: l.difficulty,
     shots: l.shots,
     colors: l.colors,
@@ -118,8 +126,8 @@ function defineLevels(list: LevelInput[]): LevelDef[] {
  * niveau pour vérifier qu'il reste gagnable.
  */
 export const LEVELS: LevelDef[] = defineLevels([
-  { title: 'La rose et la montre', photo: 'serge-belmont-01.webp', difficulty: 'facile', pattern: 'plein', colors: 4, rows: 6, shots: 24, target: 70, seed: 101 },
-  { title: 'Terrasse sur la mer', photo: 'serge-belmont-02.webp', difficulty: 'facile', pattern: 'pyramide', colors: 4, rows: 8, shots: 26, target: 55, seed: 202 },
+  { title: 'La rose et la montre', photo: 'serge-belmont-01.webp', music: 'soiree-de-paris.mp3', difficulty: 'facile', pattern: 'plein', colors: 4, rows: 6, shots: 24, target: 70, seed: 101 },
+  { title: 'Terrasse sur la mer', photo: 'serge-belmont-02.webp', music: 'nostalgie-d-antan.mp3', difficulty: 'facile', pattern: 'pyramide', colors: 4, rows: 8, shots: 26, target: 55, seed: 202 },
   /*
    * Les murs sont tous placés dans la partie haute, au milieu des boules,
    * jamais entre le canon et le plateau. Leur nombre augmente avec le niveau :
@@ -127,12 +135,12 @@ export const LEVELS: LevelDef[] = defineLevels([
    */
   // Niveau 3 — 1 mur : un pilier central descend du plafond.
   {
-    title: 'Clair de lune', photo: 'serge-belmont-03.webp', difficulty: 'facile', pattern: 'plein', colors: 5, rows: 7, shots: 26, target: 72, seed: 303,
+    title: 'Clair de lune', photo: 'serge-belmont-03.webp', music: 'nuit-douce.mp3', difficulty: 'facile', pattern: 'plein', colors: 5, rows: 7, shots: 26, target: 72, seed: 303,
     walls: [{ type: 'v', col: 5.75, row: 0, len: 3 }],
   },
   // Niveau 4 — 2 murs : deux piliers découpent trois alcôves.
   {
-    title: 'Lecture au couchant', photo: 'serge-belmont-04.webp', difficulty: 'facile', pattern: 'plein', colors: 4, rows: 8, shots: 28, target: 68, seed: 404,
+    title: 'Lecture au couchant', photo: 'serge-belmont-04.webp', music: 'nostalgie-d-antan-8.mp3', difficulty: 'facile', pattern: 'plein', colors: 4, rows: 8, shots: 28, target: 68, seed: 404,
     walls: [
       { type: 'v', col: 3, row: 0, len: 3.5 },
       { type: 'v', col: 8.5, row: 0, len: 3.5 },
@@ -140,7 +148,7 @@ export const LEVELS: LevelDef[] = defineLevels([
   },
   // Niveau 5 — 2 murs : un T suspendu au plafond, des boules posées sur ses bras.
   {
-    title: 'La rose blanche', photo: 'serge-belmont-05.webp', difficulty: 'moyen', pattern: 'plein', colors: 5, rows: 8, shots: 22, target: 75, seed: 505,
+    title: 'La rose blanche', photo: 'serge-belmont-05.webp', music: 'april-sur-l-ile-1.mp3', difficulty: 'moyen', pattern: 'plein', colors: 5, rows: 8, shots: 22, target: 75, seed: 505,
     walls: [
       { type: 'v', col: 5.75, row: 0, len: 4.35 },
       { type: 'h', row: 4, col: 4.25, len: 3 },
@@ -148,7 +156,7 @@ export const LEVELS: LevelDef[] = defineLevels([
   },
   // Niveau 6 — 3 murs : deux corniches et un pilier flottant.
   {
-    title: 'Crépuscule', photo: 'serge-belmont-11.webp', difficulty: 'moyen', pattern: 'plein', colors: 5, rows: 8, shots: 34, target: 78, seed: 606,
+    title: 'Crépuscule', photo: 'serge-belmont-11.webp', music: 'nostalgie-d-antan-5.mp3', difficulty: 'moyen', pattern: 'plein', colors: 5, rows: 8, shots: 34, target: 78, seed: 606,
     walls: [
       { type: 'h', row: 3, col: 1, len: 2.5 },
       { type: 'h', row: 3, col: 8, len: 2.5 },
@@ -157,7 +165,7 @@ export const LEVELS: LevelDef[] = defineLevels([
   },
   // Niveau 7 — 4 murs : une niche en C ouverte vers le bord gauche, et un pilier.
   {
-    title: 'La lettre', photo: 'serge-belmont-07.webp', difficulty: 'moyen', pattern: 'plein', colors: 5, rows: 9, shots: 36, target: 76, seed: 707,
+    title: 'La lettre', photo: 'serge-belmont-07.webp', music: 'april-sur-l-ile-3.mp3', difficulty: 'moyen', pattern: 'plein', colors: 5, rows: 9, shots: 36, target: 76, seed: 707,
     walls: [
       { type: 'h', row: 2, col: 2.1, len: 2.5 },
       { type: 'h', row: 5, col: 2.1, len: 2.5 },
@@ -167,7 +175,7 @@ export const LEVELS: LevelDef[] = defineLevels([
   },
   // Niveau 8 — 4 murs : une croix centrale et deux piliers.
   {
-    title: 'Sous le grand arbre', photo: 'serge-belmont-08.webp', difficulty: 'moyen', pattern: 'plein', colors: 5, rows: 9, shots: 26, target: 72, seed: 808,
+    title: 'Sous le grand arbre', photo: 'serge-belmont-08.webp', music: 'nostalgie-d-antan-1.mp3', difficulty: 'moyen', pattern: 'plein', colors: 5, rows: 9, shots: 26, target: 72, seed: 808,
     walls: [
       { type: 'h', row: 4, col: 4, len: 3.5 },
       { type: 'v', col: 5.75, row: 2.2, len: 3.6 },
@@ -177,7 +185,7 @@ export const LEVELS: LevelDef[] = defineLevels([
   },
   // Niveau 9 — 5 murs : des corniches en escalier.
   {
-    title: 'Jour de pluie', photo: 'serge-belmont-09.webp', difficulty: 'difficile', pattern: 'plein', colors: 5, rows: 9, shots: 24, target: 58, seed: 909,
+    title: 'Jour de pluie', photo: 'serge-belmont-09.webp', music: 'rue-de-la-pluie-2.mp3', difficulty: 'difficile', pattern: 'plein', colors: 5, rows: 9, shots: 24, target: 58, seed: 909,
     walls: [
       { type: 'h', row: 2, col: 0.5, len: 2 },
       { type: 'h', row: 4, col: 3, len: 2 },
@@ -188,7 +196,7 @@ export const LEVELS: LevelDef[] = defineLevels([
   },
   // Niveau 10 — 6 murs : deux niches en C, ouvertes chacune vers son bord.
   {
-    title: 'L’accordéon', photo: 'serge-belmont-10.webp', difficulty: 'difficile', pattern: 'plein', colors: 5, rows: 9, shots: 44, target: 56, seed: 1010,
+    title: 'L’accordéon', photo: 'serge-belmont-10.webp', music: 'soir-d-ete.mp3', difficulty: 'difficile', pattern: 'plein', colors: 5, rows: 9, shots: 44, target: 56, seed: 1010,
     walls: [
       { type: 'h', row: 2, col: 1.8, len: 2.6 },
       { type: 'h', row: 5, col: 1.8, len: 2.6 },
@@ -200,7 +208,7 @@ export const LEVELS: LevelDef[] = defineLevels([
   },
   // Niveau 11 — 7 murs : trois piliers et quatre corniches en quinconce.
   {
-    title: 'La valse', photo: 'serge-belmont-06.webp', difficulty: 'difficile', pattern: 'plein', colors: 5, rows: 9, shots: 40, target: 76, seed: 1111,
+    title: 'La valse', photo: 'serge-belmont-06.webp', music: 'rue-de-la-pluie.mp3', difficulty: 'difficile', pattern: 'plein', colors: 5, rows: 9, shots: 40, target: 76, seed: 1111,
     walls: [
       { type: 'v', col: 2.9, row: 0, len: 2 },
       { type: 'v', col: 5.75, row: 0, len: 3 },
@@ -213,7 +221,7 @@ export const LEVELS: LevelDef[] = defineLevels([
   },
   // Niveau 12 — 8 murs : une chambre forte centrale, des piliers et des corniches.
   {
-    title: 'Promenade en bord de mer', photo: 'serge-belmont-12.webp', difficulty: 'difficile', pattern: 'plein', colors: 6, rows: 9, shots: 38, target: 78, seed: 1212,
+    title: 'Promenade en bord de mer', photo: 'serge-belmont-12.webp', music: 'nostalgie-d-antan-3.mp3', difficulty: 'difficile', pattern: 'plein', colors: 6, rows: 9, shots: 38, target: 78, seed: 1212,
     walls: [
       { type: 'h', row: 2, col: 4.2, len: 3.1 },
       { type: 'v', col: 4.35, row: 2.25, len: 2.3 },
