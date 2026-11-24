@@ -130,6 +130,14 @@
             <input id="sfx-volume" type="range" min="0" max="100" step="5" value="80" />
           </label>
           <p class="setting-note" data-i18n="settings.note">À 0 %, le son correspondant est coupé.</p>
+          <div class="setting-privacy">
+            <label class="switch">
+              <input id="analytics-toggle" type="checkbox" checked />
+              <span class="switch-track" aria-hidden="true"></span>
+              <span data-i18n="settings.analytics">Statistiques anonymes</span>
+            </label>
+            <a class="privacy-link" href="https://sergebelmont.com/confidentialite/" target="_blank" rel="noopener" data-i18n="settings.privacy">Confidentialité</a>
+          </div>
           <div class="settings-foot">
             <button id="btn-settings-close" class="btn primary" type="button" data-i18n="close">Fermer</button>
             <button id="btn-lang" class="lang-btn" type="button" aria-label="Langue" data-i18n-aria="settings.language" aria-controls="lang-picker">

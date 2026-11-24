@@ -39,6 +39,8 @@ export const ro: Dict = {
   'settings.music': 'Muzică',
   'settings.sfx': 'Efecte sonore',
   'settings.note': 'La 0%, sunetul respectiv este oprit.',
+  'settings.analytics': 'Statistici anonime',
+  'settings.privacy': 'Confidențialitate',
   'settings.language': 'Limbă',
 
   'board.title': 'Clasament',

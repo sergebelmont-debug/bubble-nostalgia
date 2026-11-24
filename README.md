@@ -106,6 +106,17 @@ Anonyme : pas de compte, le joueur choisit un pseudo. Mise en service :
 Modération : un pseudo indésirable se supprime dans Table Editor → `players`.
 En ajoutant des niveaux, augmenter `bn_level_count()` dans le script SQL.
 
+## Statistiques anonymes
+
+Le jeu mesure son audience sans cookie ni bandeau (exemption CNIL) : identifiant
+aléatoire par appareil, étapes de jeu, durée, provenance, appareil. Le joueur peut
+refuser dans les Réglages. Données effacées après 13 mois.
+
+- Base : [supabase/statistiques.sql](supabase/statistiques.sql) (à lancer dans Supabase avec un mot de passe).
+- Code du jeu : `src/services/Analytics.ts`.
+- Tableau de bord : https://sergebelmont.com/stats/ (mot de passe).
+- Provenance : ajouter `?src=tiktok`, `?src=facebook`… aux liens partagés.
+
 ## Langues
 
 Le jeu est traduit en 11 langues (français, anglais, russe, espagnol, portugais,

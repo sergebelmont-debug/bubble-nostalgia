@@ -39,6 +39,8 @@ export const tr: Dict = {
   'settings.music': 'Müzik',
   'settings.sfx': 'Ses efektleri',
   'settings.note': '%0’da ilgili ses kapanır.',
+  'settings.analytics': 'Anonim istatistikler',
+  'settings.privacy': 'Gizlilik',
   'settings.language': 'Dil',
 
   'board.title': 'Sıralama',

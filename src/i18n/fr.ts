@@ -51,6 +51,8 @@ export const fr = {
   'settings.music': 'Musique',
   'settings.sfx': 'Effets sonores',
   'settings.note': 'À 0 %, le son correspondant est coupé.',
+  'settings.analytics': 'Statistiques anonymes',
+  'settings.privacy': 'Confidentialité',
   'settings.language': 'Langue',
 
   // Classement

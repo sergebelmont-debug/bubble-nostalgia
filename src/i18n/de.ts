@@ -39,6 +39,8 @@ export const de: Dict = {
   'settings.music': 'Musik',
   'settings.sfx': 'Soundeffekte',
   'settings.note': 'Bei 0 % ist der jeweilige Ton aus.',
+  'settings.analytics': 'Anonyme Statistiken',
+  'settings.privacy': 'Datenschutz',
   'settings.language': 'Sprache',
 
   'board.title': 'Rangliste',

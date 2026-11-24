@@ -6,6 +6,7 @@ import { isOnline } from '../config/online';
 import { LEVELS, MENU_MUSIC } from '../data/levels';
 import { applyStatic, lang, LANGS, langInfo, levelTitle, num, onLangChange, pct, setLang, t, type Lang } from '../i18n';
 import type { MenuArt } from '../render/menuArt';
+import { analytics } from '../services/Analytics';
 import { playerPseudo, syncScores } from '../services/Leaderboard';
 import { homePhotoUrl, photoUrl } from '../services/PhotoService';
 import { loadSave, writeSave } from '../services/SaveService';
@@ -53,10 +54,12 @@ export function initUi(actions: UiActions): void {
   let lastEnd: { r: LevelResult; won: boolean } | null = null;
 
   applyStatic();
+  analytics.start(lang());
   $('home-photo').style.backgroundImage = `url("${homePhotoUrl()}")`;
 
   const hideAll = (): void => {
     hideTips();
+    analytics.endLevel('quit'); // niveau quitté avant la fin
     for (const el of [hud, home, map, end, collection, viewer, settings, board, guide]) el.classList.add('hidden');
   };
 
@@ -90,6 +93,7 @@ export function initUi(actions: UiActions): void {
     board.classList.remove('hidden');
     music.play(MENU_MUSIC);
     renderBoard();
+    analytics.track('board');
   };
 
   // Le classement n'apparaît que si le serveur est configuré (config/online.ts).
@@ -118,6 +122,7 @@ export function initUi(actions: UiActions): void {
         sfx.click();
         $<HTMLImageElement>('viewer-img').src = url;
         $('viewer-caption').textContent = caption;
+        analytics.track('photo', { level: Number(caption.split(' ')[0]) || undefined });
         viewer.classList.remove('hidden');
       },
       onLocked: () => sfx.bounce(),
@@ -131,6 +136,7 @@ export function initUi(actions: UiActions): void {
     $('collection-scroll').scrollTop = 0;
     music.play(MENU_MUSIC);
     collection.classList.remove('hidden');
+    analytics.track('collection');
   };
 
   // ───────────────────────────── Carte ─────────────────────────────
@@ -244,6 +250,10 @@ export function initUi(actions: UiActions): void {
     pausedForSettings = false;
     sfx.click();
   };
+  // Statistiques anonymes : le joueur peut les refuser à tout moment.
+  const analyticsToggle = $<HTMLInputElement>('analytics-toggle');
+  analyticsToggle.checked = !analytics.optedOut;
+  analyticsToggle.addEventListener('change', () => analytics.setOptOut(!analyticsToggle.checked));
   $('btn-settings').addEventListener('click', openSettings);
   $('btn-home-settings').addEventListener('click', openSettings);
   $('btn-settings-close').addEventListener('click', closeSettings);
@@ -288,6 +298,7 @@ export function initUi(actions: UiActions): void {
     renderGuideScreen();
     $('guide-scroll').scrollTop = 0;
     guide.classList.remove('hidden');
+    analytics.track('guide');
   });
   $('btn-guide-back').addEventListener('click', () => {
     sfx.click();
@@ -341,6 +352,7 @@ export function initUi(actions: UiActions): void {
     }
     levelIndex = e.levelIndex;
     lastScore = 0;
+    if (visible(hud)) analytics.levelStart(e.levelIndex + 1);
   });
 
   const renderHud = (s: HudState): void => {
@@ -357,6 +369,7 @@ export function initUi(actions: UiActions): void {
     // Premier tir joué : la main d'aide à la visée disparaît.
     if (s.shots < LEVELS[levelIndex].shots) hideAimHint();
     lastHud = s;
+    analytics.levelProgress(s.percent);
     renderHud(s);
     if (s.score !== lastScore) {
       lastScore = s.score;
@@ -396,15 +409,21 @@ export function initUi(actions: UiActions): void {
   };
 
   bus.on('win', (r) => {
+    analytics.endLevel('won', 100);
     showEnd(r, true);
     if (isOnline()) void syncScores();
   });
-  bus.on('lose', (r) => showEnd(r, false));
+  bus.on('lose', (r) => {
+    analytics.endLevel('lost', r.percent);
+    showEnd(r, false);
+  });
 
   // ───────────────────────────── Changement de langue ─────────────────────────────
   // Tous les écrans visibles sont redessinés aussitôt dans la nouvelle langue.
   onLangChange(() => {
+    analytics.track('lang', { lang: lang() });
     applyStatic();
+  analytics.start(lang());
     renderVolumes();
     renderLangButton();
     markCurrentLang();

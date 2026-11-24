@@ -1705,3 +1705,68 @@ body {
   height: calc(var(--u) * 20);
   margin-top: calc(var(--u) * 4);
 }
+
+/* ───────── Confidentialité (réglages) ───────── */
+.setting-privacy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--u) * 12);
+  margin: calc(var(--u) * -12) 0 calc(var(--u) * 26);
+  font-size: calc(var(--u) * 22);
+}
+
+.switch {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--u) * 12);
+  cursor: pointer;
+  text-align: left;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.switch-track {
+  position: relative;
+  flex: none;
+  width: calc(var(--u) * 58);
+  height: calc(var(--u) * 32);
+  border-radius: calc(var(--u) * 16);
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.15s ease;
+}
+
+.switch-track::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--u) * 4);
+  left: calc(var(--u) * 4);
+  width: calc(var(--u) * 24);
+  height: calc(var(--u) * 24);
+  border-radius: 50%;
+  background: #fff3dc;
+  transition: transform 0.15s ease;
+}
+
+.switch input:checked + .switch-track {
+  background: #c98a2a;
+}
+
+.switch input:checked + .switch-track::after {
+  transform: translateX(calc(var(--u) * 26));
+}
+
+.switch input:focus-visible + .switch-track {
+  outline: calc(var(--u) * 3) solid var(--gold);
+  outline-offset: calc(var(--u) * 2);
+}
+
+.privacy-link {
+  flex: none;
+  color: var(--gold);
+  font-weight: 600;
+}

@@ -39,6 +39,8 @@ export const ru: Dict = {
   'settings.music': 'Музыка',
   'settings.sfx': 'Звуковые эффекты',
   'settings.note': 'На 0 % этот звук выключен.',
+  'settings.analytics': 'Анонимная статистика',
+  'settings.privacy': 'Конфиденциальность',
   'settings.language': 'Язык',
 
   'board.title': 'Рейтинг',

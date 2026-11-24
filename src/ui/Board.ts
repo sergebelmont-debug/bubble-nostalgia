@@ -1,4 +1,5 @@
 import { esc, num, t } from '../i18n';
+import { analytics } from '../services/Analytics';
 import { BoardError, fetchBoard, playerPseudo, setPseudo, type BoardRow } from '../services/Leaderboard';
 
 /** Écran « Classement » : pseudo du joueur et meilleurs scores cumulés. */
@@ -75,6 +76,7 @@ export function initBoard(onClick: () => void): void {
     setPseudo(value).then(
       () => {
         submit.disabled = false;
+        analytics.track('pseudo');
         renderBoard();
       },
       (err: unknown) => {
