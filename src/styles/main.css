@@ -1692,3 +1692,16 @@ body {
   border-color: var(--gold);
   background: rgba(255, 214, 107, 0.15);
 }
+
+/* Deux drapeaux côte à côte (portugais : Portugal et Brésil). */
+.flag-pair {
+  display: flex;
+  gap: calc(var(--u) * 3);
+  flex: none;
+}
+
+.flag-pair .flag {
+  width: calc(var(--u) * 30);
+  height: calc(var(--u) * 20);
+  margin-top: calc(var(--u) * 4);
+}

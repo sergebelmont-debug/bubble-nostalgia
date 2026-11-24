@@ -33,6 +33,30 @@ function star(cx: number, cy: number, r: number): string {
 
 const flag = (inner: string): string =>
   `<svg class="flag" viewBox="0 0 30 20" aria-hidden="true" preserveAspectRatio="none">${inner}</svg>`;
+/** États-Unis : 13 bandes, canton bleu semé d'étoiles (points). */
+const US_FLAG = (() => {
+  const h = 20 / 13;
+  let s = '<rect width="30" height="20" fill="#FFFFFF"/>';
+  for (let i = 0; i < 13; i += 2) s += `<rect y="${(i * h).toFixed(3)}" width="30" height="${h.toFixed(3)}" fill="#B22234"/>`;
+  s += `<rect width="12" height="${(7 * h).toFixed(3)}" fill="#3C3B6E"/>`;
+  for (let r = 0; r < 5; r++) {
+    for (let c = 0; c < 6; c++) {
+      if (r % 2 === 1 && c === 5) continue;
+      const x = 1.1 + c * 1.95 + (r % 2 ? 0.97 : 0);
+      s += `<circle cx="${x.toFixed(2)}" cy="${(1.1 + r * 2.05).toFixed(2)}" r="0.42" fill="#FFFFFF"/>`;
+    }
+  }
+  return s;
+})();
+
+/** Portugal : vert et rouge, sphère armillaire simplifiée. */
+const PT_FLAG =
+  '<rect width="30" height="20" fill="#DA291C"/><rect width="12" height="20" fill="#046A38"/><circle cx="12" cy="10" r="3.6" fill="#FFE900"/><circle cx="12" cy="10" r="2.2" fill="#DA291C"/>';
+
+/** Brésil : losange jaune, globe bleu et bande blanche. */
+const BR_FLAG =
+  '<rect width="30" height="20" fill="#009C3B"/><polygon points="2.6,10 15,2.2 27.4,10 15,17.8" fill="#FFDF00"/><circle cx="15" cy="10" r="4.6" fill="#002776"/><path d="M10.6 9.1Q15 7.6 19.5 10.9" stroke="#FFFFFF" stroke-width="0.9" fill="none"/>';
+
 const vert = (a: string, b: string, c: string): string =>
   flag(`<rect width="10" height="20" fill="${a}"/><rect x="10" width="10" height="20" fill="${b}"/><rect x="20" width="10" height="20" fill="${c}"/>`);
 const horiz = (a: string, b: string, c: string): string =>
@@ -43,11 +67,9 @@ export const LANGS: Array<{ code: Lang; name: string; locale: string; flag: stri
   {
     code: 'en',
     name: 'English',
-    locale: 'en-GB',
+    locale: 'en-US',
     dict: en,
-    flag: flag(
-      '<rect width="30" height="20" fill="#012169"/><path d="M0 0L30 20M30 0L0 20" stroke="#FFF" stroke-width="4"/><path d="M0 0L30 20M30 0L0 20" stroke="#C8102E" stroke-width="1.5"/><path d="M15 0V20M0 10H30" stroke="#FFF" stroke-width="6"/><path d="M15 0V20M0 10H30" stroke="#C8102E" stroke-width="3.4"/>',
-    ),
+    flag: flag(US_FLAG),
   },
   { code: 'ru', name: 'Русский', locale: 'ru-RU', dict: ru, flag: horiz('#FFFFFF', '#0039A6', '#D52B1E') },
   {
@@ -62,9 +84,8 @@ export const LANGS: Array<{ code: Lang; name: string; locale: string; flag: stri
     name: 'Português',
     locale: 'pt-PT',
     dict: pt,
-    flag: flag(
-      '<rect width="30" height="20" fill="#DA291C"/><rect width="12" height="20" fill="#046A38"/><circle cx="12" cy="10" r="3.6" fill="#FFE900"/><circle cx="12" cy="10" r="2.2" fill="#DA291C"/>',
-    ),
+    // Portugal et Brésil, côte à côte.
+    flag: `<span class="flag-pair">${flag(PT_FLAG)}${flag(BR_FLAG)}</span>`,
   },
   {
     code: 'pl',
