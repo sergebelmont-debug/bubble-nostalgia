@@ -35,16 +35,16 @@
 
       <header id="hud" class="hidden">
         <div class="hud-row">
-          <div class="pill"><span class="lbl">Niveau</span><b id="hud-level">1</b></div>
-          <div class="score"><span class="lbl">Score</span><b id="hud-score">0</b></div>
-          <div id="hud-shots-pill" class="pill shots" title="Tirs restants"><i class="orb"></i><b id="hud-shots">0</b></div>
-          <button id="btn-settings" class="icon-btn" type="button" aria-label="Réglages du son">
+          <div class="pill"><span class="lbl" data-i18n="hud.level">Niveau</span><b id="hud-level">1</b></div>
+          <div class="score"><span class="lbl" data-i18n="hud.score">Score</span><b id="hud-score">0</b></div>
+          <div id="hud-shots-pill" class="pill shots" title="Tirs restants" data-i18n-title="hud.shots"><i class="orb"></i><b id="hud-shots">0</b></div>
+          <button id="btn-settings" class="icon-btn" type="button" aria-label="Réglages" data-i18n-aria="aria.settings">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" /><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3 5.5 5.5" /><circle cx="12" cy="12" r="6.4" /></svg>
           </button>
-          <button id="btn-restart" class="icon-btn" type="button" aria-label="Recommencer le niveau">
+          <button id="btn-restart" class="icon-btn" type="button" aria-label="Recommencer le niveau" data-i18n-aria="aria.restart">
             <svg viewBox="0 0 24 24"><path d="M12 5a7 7 0 1 1-6.6 4.7" /><path d="M5 4v5.5h5.5" /></svg>
           </button>
-          <button id="btn-map" class="icon-btn" type="button" aria-label="Retour à la carte des niveaux">
+          <button id="btn-map" class="icon-btn" type="button" aria-label="Retour à la carte des niveaux" data-i18n-aria="aria.toMap">
             <svg viewBox="0 0 24 24"><path d="M5 5h5v5H5z" /><path d="M14 5h5v5h-5z" /><path d="M5 14h5v5H5z" /><path d="M14 14h5v5h-5z" /></svg>
           </button>
         </div>
@@ -61,7 +61,7 @@
         <div id="home-photo" class="home-photo"></div>
         <div id="home-bubbles" class="home-art home-bubbles" aria-hidden="true"></div>
         <div id="home-cannon" class="home-art home-cannon" aria-hidden="true"></div>
-        <button id="btn-home-settings" class="icon-btn home-settings" type="button" aria-label="Réglages du son">
+        <button id="btn-home-settings" class="icon-btn home-settings" type="button" aria-label="Réglages" data-i18n-aria="aria.settings">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" /><path d="M12 2.8v2.6M12 18.6v2.6M21.2 12h-2.6M5.4 12H2.8M18.5 5.5l-1.8 1.8M7.3 16.7l-1.8 1.8M18.5 18.5l-1.8-1.8M7.3 7.3 5.5 5.5" /><circle cx="12" cy="12" r="6.4" /></svg>
         </button>
         <div class="start-card">
@@ -70,26 +70,26 @@
             <h1>Bubble Nostalgia</h1>
           </div>
           <div class="home-bottom">
-            <p class="tagline">Éclatez les boules, dissipez le brouillard<br />et révélez la photographie.</p>
-            <button id="btn-play" class="btn primary" type="button">Jouer</button>
+            <p class="tagline" data-i18n="home.tagline">Éclatez les boules, dissipez le brouillard<br />et révélez la photographie.</p>
+            <button id="btn-play" class="btn primary" type="button" data-i18n="home.play">Jouer</button>
             <div class="home-row">
               <button id="btn-collection" class="btn sepia" type="button">
-                Collection <span id="home-collection" class="count"></span>
+                <span data-i18n="home.collection">Collection</span> <span id="home-collection" class="count"></span>
               </button>
-              <button id="btn-board" class="btn sepia hidden" type="button">Classement</button>
+              <button id="btn-board" class="btn sepia hidden" type="button" data-i18n="home.board">Classement</button>
             </div>
             <p id="home-progress" class="home-progress"></p>
-            <p class="version">Version 0.8</p>
+            <p id="home-version" class="version">Version 0.9</p>
           </div>
         </div>
       </section>
 
       <section id="screen-collection" class="overlay collection hidden">
         <header class="map-head">
-          <button id="btn-collection-home" class="icon-btn" type="button" aria-label="Retour à l'accueil">
+          <button id="btn-collection-home" class="icon-btn" type="button" aria-label="Retour à l'accueil" data-i18n-aria="aria.home">
             <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5" /><path d="M6.5 10v9h11v-9" /></svg>
           </button>
-          <h3>Collection</h3>
+          <h3 data-i18n="collection.title">Collection</h3>
           <div class="pill"><b id="collection-count">0 / 0</b></div>
         </header>
         <div class="collection-progress"><div id="collection-fill"></div></div>
@@ -97,20 +97,20 @@
           <p id="collection-hint" class="collection-hint"></p>
           <div id="collection-grid"></div>
         </div>
-        <div id="photo-viewer" class="hidden" role="dialog" aria-label="Photographie">
+        <div id="photo-viewer" class="hidden" role="dialog" aria-label="Photographie" data-i18n-aria="collection.photo">
           <img id="viewer-img" alt="" draggable="false" />
           <p id="viewer-caption"></p>
-          <button id="btn-viewer-close" class="btn sepia" type="button">Fermer</button>
+          <button id="btn-viewer-close" class="btn sepia" type="button" data-i18n="close">Fermer</button>
         </div>
       </section>
 
       <section id="screen-map" class="overlay map hidden">
         <header class="map-head">
-          <button id="btn-map-home" class="icon-btn" type="button" aria-label="Retour à l'accueil">
+          <button id="btn-map-home" class="icon-btn" type="button" aria-label="Retour à l'accueil" data-i18n-aria="aria.home">
             <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5" /><path d="M6.5 10v9h11v-9" /></svg>
           </button>
-          <h3>Niveaux</h3>
-          <button id="btn-guide" class="guide-btn" type="button">? Comment jouer</button>
+          <h3 data-i18n="map.title">Niveaux</h3>
+          <button id="btn-guide" class="guide-btn" type="button" data-i18n="map.guide">? Comment jouer</button>
           <div class="pill"><span class="star-ico">★</span><b id="map-stars">0</b></div>
         </header>
         <div id="map-scroll">
@@ -120,34 +120,40 @@
 
       <section id="screen-settings" class="overlay settings hidden" role="dialog" aria-labelledby="settings-title">
         <div class="settings-card">
-          <h3 id="settings-title">Réglages</h3>
+          <h3 id="settings-title" data-i18n="settings.title">Réglages</h3>
           <label class="setting">
-            <span class="setting-head"><span>Musique</span><b id="music-value">60 %</b></span>
+            <span class="setting-head"><span data-i18n="settings.music">Musique</span><b id="music-value">60 %</b></span>
             <input id="music-volume" type="range" min="0" max="100" step="5" value="60" />
           </label>
           <label class="setting">
-            <span class="setting-head"><span>Effets sonores</span><b id="sfx-value">80 %</b></span>
+            <span class="setting-head"><span data-i18n="settings.sfx">Effets sonores</span><b id="sfx-value">80 %</b></span>
             <input id="sfx-volume" type="range" min="0" max="100" step="5" value="80" />
           </label>
-          <p class="setting-note">À 0 %, le son correspondant est coupé.</p>
-          <button id="btn-settings-close" class="btn primary" type="button">Fermer</button>
+          <p class="setting-note" data-i18n="settings.note">À 0 %, le son correspondant est coupé.</p>
+          <div class="settings-foot">
+            <button id="btn-settings-close" class="btn primary" type="button" data-i18n="close">Fermer</button>
+            <button id="btn-lang" class="lang-btn" type="button" aria-label="Langue" data-i18n-aria="settings.language" aria-controls="lang-picker">
+              <span id="lang-current" class="lang-current"></span>
+            </button>
+          </div>
+          <div id="lang-picker" class="lang-picker hidden"></div>
         </div>
       </section>
 
       <section id="screen-board" class="overlay collection board hidden">
         <header class="map-head">
-          <button id="btn-board-home" class="icon-btn" type="button" aria-label="Retour à l'accueil">
+          <button id="btn-board-home" class="icon-btn" type="button" aria-label="Retour à l'accueil" data-i18n-aria="aria.home">
             <svg viewBox="0 0 24 24"><path d="M4 11.5 12 5l8 6.5" /><path d="M6.5 10v9h11v-9" /></svg>
           </button>
-          <h3>Classement</h3>
+          <h3 data-i18n="board.title">Classement</h3>
           <span class="head-spacer"></span>
         </header>
         <div class="board-top">
           <form id="board-form" class="board-form" autocomplete="off">
-            <label for="board-pseudo">Choisissez un pseudo pour apparaître au classement (pas de compte à créer)</label>
+            <label for="board-pseudo" data-i18n="board.label">Choisissez un pseudo pour apparaître au classement (pas de compte à créer)</label>
             <div class="board-form-row">
-              <input id="board-pseudo" type="text" maxlength="16" minlength="3" placeholder="Votre pseudo" enterkeyhint="done" />
-              <button id="btn-board-save" class="btn primary compact" type="submit">Valider</button>
+              <input id="board-pseudo" type="text" maxlength="16" minlength="3" placeholder="Votre pseudo" data-i18n-placeholder="board.placeholder" enterkeyhint="done" />
+              <button id="btn-board-save" class="btn primary compact" type="submit" data-i18n="board.save">Valider</button>
             </div>
             <p id="board-form-msg" class="board-msg" aria-live="polite"></p>
           </form>
@@ -156,29 +162,29 @@
               <b id="board-me-name"></b>
               <span id="board-me-rank"></span>
             </div>
-            <button id="btn-board-edit" class="link-btn" type="button">Modifier</button>
+            <button id="btn-board-edit" class="link-btn" type="button" data-i18n="board.edit">Modifier</button>
           </div>
         </div>
         <div id="board-scroll">
           <p id="board-status" class="collection-hint" aria-live="polite"></p>
           <ol id="board-list"></ol>
-          <p class="board-foot">Score total = somme de vos meilleurs scores sur chaque niveau.</p>
+          <p class="board-foot" data-i18n="board.foot">Score total = somme de vos meilleurs scores sur chaque niveau.</p>
         </div>
       </section>
 
       <section id="intro" class="hidden"></section>
       <div id="aim-hint" class="hidden" aria-hidden="true">
         <div class="aim-hand"></div>
-        <p>Glissez puis relâchez</p>
+        <p data-i18n="aim.hint">Glissez puis relâchez</p>
       </div>
       <div id="tip-toast" class="hidden" role="status"></div>
 
       <section id="screen-guide" class="overlay collection guide hidden">
         <header class="map-head">
-          <button id="btn-guide-back" class="icon-btn" type="button" aria-label="Retour à la carte des niveaux">
+          <button id="btn-guide-back" class="icon-btn" type="button" aria-label="Retour à la carte des niveaux" data-i18n-aria="aria.toMap">
             <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" /></svg>
           </button>
-          <h3>Comment jouer</h3>
+          <h3 data-i18n="guide.title">Comment jouer</h3>
           <span class="head-spacer"></span>
         </header>
         <div id="guide-scroll"><div id="guide-content"></div></div>
@@ -190,15 +196,15 @@
           <p id="end-sub"></p>
           <div id="end-stars" class="stars"><span>★</span><span>★</span><span>★</span></div>
           <div class="stats">
-            <div><span class="lbl">Score</span><b id="end-score">0</b></div>
-            <div><span class="lbl">Photo révélée</span><b id="end-percent">0 %</b></div>
-            <div><span class="lbl">Tirs restants</span><b id="end-shots">0</b></div>
+            <div><span class="lbl" data-i18n="end.score">Score</span><b id="end-score">0</b></div>
+            <div><span class="lbl" data-i18n="end.revealed">Photo révélée</span><b id="end-percent">0 %</b></div>
+            <div><span class="lbl" data-i18n="end.shotsLeft">Tirs restants</span><b id="end-shots">0</b></div>
           </div>
           <p id="end-note" class="note"></p>
           <div class="actions">
-            <button id="btn-end-map" class="btn secondary compact" type="button" aria-label="Carte des niveaux">Carte</button>
+            <button id="btn-end-map" class="btn secondary compact" type="button" aria-label="Carte des niveaux" data-i18n-aria="end.mapAria" data-i18n="end.map">Carte</button>
             <button id="btn-again" class="btn secondary" type="button">Rejouer</button>
-            <button id="btn-next" class="btn primary" type="button">Niveau suivant</button>
+            <button id="btn-next" class="btn primary" type="button" data-i18n="end.next">Niveau suivant</button>
           </div>
         </div>
       </section>

@@ -106,6 +106,16 @@ Anonyme : pas de compte, le joueur choisit un pseudo. Mise en service :
 Modération : un pseudo indésirable se supprime dans Table Editor → `players`.
 En ajoutant des niveaux, augmenter `bn_level_count()` dans le script SQL.
 
+## Langues
+
+Le jeu est traduit en 11 langues (français, anglais, russe, espagnol, portugais,
+polonais, turc, roumain, allemand, italien, néerlandais). Le joueur choisit sa
+langue dans les Réglages (drapeau en bas à droite) ; à la première visite, la
+langue du téléphone est utilisée si elle est disponible, sinon le français.
+
+Textes : un fichier par langue dans `src/i18n/` (`fr.ts` est la référence).
+Une clé manquante dans une langue est signalée à la compilation.
+
 ## Collection
 
 L'écran « Collection » (menu d'accueil) affiche les photos des niveaux terminés ;

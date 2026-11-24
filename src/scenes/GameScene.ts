@@ -26,6 +26,7 @@ import { LEVELS, type LevelDef } from '../data/levels';
 import { BUBBLE_SPRITE_SIZE, bubbleKey, createGameTextures } from '../render/BubbleTextures';
 import { BARREL_H, BARREL_W, BASE_SIZE, HOLDER_SIZE, STAND_H, STAND_W } from '../render/CannonTextures';
 import { FogReveal } from '../render/FogReveal';
+import { onLangChange, t } from '../i18n';
 import { createPlaceholderPhoto, photoTextureKey, photoUrl } from '../services/PhotoService';
 import { recordResult } from '../services/SaveService';
 
@@ -65,6 +66,8 @@ const SKIP_DELAY = 3000;
 const MUZZLE_DIST = 180;
 /** Accélération du temps, réservée aux tests d'équilibrage (1 = normal). */
 let debugSpeed = 1;
+let langHooked = false;
+let activeScene: GameScene | null = null;
 
 export class GameScene extends Phaser.Scene {
   private levelIndex = 0;
@@ -103,6 +106,8 @@ export class GameScene extends Phaser.Scene {
   private guide!: Phaser.GameObjects.Graphics;
 
   private skipX = 0;
+  /** Étiquettes sous le canon (« SUIVANTE », « CHANGEMENT »), traduites. */
+  private holderLabels: Array<{ label: Phaser.GameObjects.Text; key: 'game.next' | 'game.change' }> = [];
   private skipY = 0;
   /** Temps restant (ms) avant le changement automatique de la boule chargée. */
   private skipCooldown = SKIP_DELAY;
@@ -185,11 +190,26 @@ export class GameScene extends Phaser.Scene {
       this.fog.destroy();
     });
 
+    if (!langHooked) {
+      langHooked = true;
+      onLangChange(() => activeScene?.refreshLabels());
+    }
+    activeScene = this;
+
     if (import.meta.env.DEV) (window as unknown as { __game: GameScene }).__game = this;
 
     this.emitHud();
     bus.emit('ready', { levelIndex: this.levelIndex });
     if (this.autostart) this.beginPlay();
+  }
+
+  /** Retraduit les étiquettes du canevas après un changement de langue. */
+  refreshLabels(): void {
+    for (const { label, key } of this.holderLabels) {
+      if (!label.active) continue;
+      label.setText(t(key));
+      this.fitLabel(label);
+    }
   }
 
   /** Lance la partie (appelé par l'interface après l'écran de démarrage). */
@@ -352,6 +372,13 @@ export class GameScene extends Phaser.Scene {
     for (let x = GEOM.left + 8; x < GEOM.left + GEOM.width - 8; x += 26) line.fillRoundedRect(x, lineY - 1.5, 13, 3, 1.5);
   }
 
+  /** Réduit une étiquette trop longue (certaines langues) pour qu'elle tienne sous son support. */
+  private fitLabel(label: Phaser.GameObjects.Text): void {
+    label.setScale(1);
+    const max = 168;
+    if (label.width > max) label.setScale(max / label.width);
+  }
+
   private createCannon(): void {
     this.add
       .image(this.cannonX, this.cannonY + 72, 'cannon-stand')
@@ -383,7 +410,7 @@ export class GameScene extends Phaser.Scene {
     this.skipRing = this.add.graphics().setDepth(DEPTH.cannon + 1);
     this.skipText = this.add
       .text(this.skipX, this.skipY, '3', {
-        fontFamily: '"Fredoka Variable", system-ui, sans-serif',
+        fontFamily: '"Fredoka Variable", "Nunito Variable", system-ui, sans-serif',
         fontStyle: '700',
         fontSize: '40px',
         color: '#ffe27a',
@@ -393,10 +420,11 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(DEPTH.cannon + 2)
       .setResolution(view.scale);
-    for (const [x, label] of [[this.nextX, 'SUIVANTE'], [this.skipX, 'CHANGEMENT']] as const) {
-      this.add
-        .text(x, this.nextY + 62, label, {
-          fontFamily: '"Fredoka Variable", system-ui, sans-serif',
+    this.holderLabels = [];
+    for (const [x, key] of [[this.nextX, 'game.next'], [this.skipX, 'game.change']] as const) {
+      const label = this.add
+        .text(x, this.nextY + 62, t(key), {
+          fontFamily: '"Fredoka Variable", "Nunito Variable", system-ui, sans-serif',
           fontStyle: '600',
           fontSize: '18px',
           color: '#ffffff',
@@ -407,6 +435,8 @@ export class GameScene extends Phaser.Scene {
         .setDepth(DEPTH.cannon + 2)
         .setResolution(view.scale)
         .setLetterSpacing(1.5);
+      this.holderLabels.push({ label, key });
+      this.fitLabel(label);
     }
 
     this.current = this.pickColor();
@@ -623,7 +653,7 @@ export class GameScene extends Phaser.Scene {
       // Renvoyée vers le bas par un mur, la boule est sortie du plateau : tir perdu.
       this.recycle(sprite);
       sfx.drop(1);
-      this.popup(Phaser.Math.Clamp(sprite.x, 120, DESIGN_W - 120), this.viewH - 150, 'Tir perdu', 38, '#ff9db0');
+      this.popup(Phaser.Math.Clamp(sprite.x, 120, DESIGN_W - 120), this.viewH - 150, t('game.lostShot'), 38, '#ff9db0');
       this.afterShot();
       return;
     }
@@ -831,7 +861,7 @@ export class GameScene extends Phaser.Scene {
   private popup(x: number, y: number, text: string, size: number, color = '#ffffff'): void {
     const label = this.add
       .text(Phaser.Math.Clamp(x, 80, DESIGN_W - 80), y, text, {
-        fontFamily: '"Fredoka Variable", system-ui, sans-serif',
+        fontFamily: '"Fredoka Variable", "Nunito Variable", system-ui, sans-serif',
         fontStyle: '700',
         fontSize: `${size}px`,
         color,

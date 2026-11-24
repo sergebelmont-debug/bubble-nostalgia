@@ -1,18 +1,19 @@
-import { bus, type LevelResult } from '../app/bus';
+import { bus, type HudState, type LevelResult } from '../app/bus';
 import { music } from '../audio/Music';
 import { sfx } from '../audio/Sfx';
 import { DESIGN_W } from '../config/gameConfig';
+import { isOnline } from '../config/online';
 import { LEVELS, MENU_MUSIC } from '../data/levels';
+import { applyStatic, lang, LANGS, langInfo, levelTitle, num, onLangChange, pct, setLang, t, type Lang } from '../i18n';
 import type { MenuArt } from '../render/menuArt';
+import { playerPseudo, syncScores } from '../services/Leaderboard';
 import { homePhotoUrl, photoUrl } from '../services/PhotoService';
 import { loadSave, writeSave } from '../services/SaveService';
-import { isOnline } from '../config/online';
-import { playerPseudo, syncScores } from '../services/Leaderboard';
 import { initBoard, renderBoard } from './Board';
 import { collectedCount, renderCollection } from './Collection';
+import { renderGuide } from './Guide';
 import { renderHomeArt } from './HomeArt';
 import { renderMap, totalStars } from './LevelMap';
-import { renderGuide } from './Guide';
 import { HAND_SVG, hideAimHint, hideTips, showAimHint, showIntro, showWallsTip, tipFor } from './Tutorial';
 
 /** Interface HTML : accueil, carte des niveaux, barre d'état, écrans de fin de niveau. */
@@ -26,8 +27,10 @@ export interface UiActions {
   resume(): void;
 }
 
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
+const VERSION = '0.9';
 
+const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
+const visible = (el: HTMLElement): boolean => !el.classList.contains('hidden');
 
 export function initUi(actions: UiActions): void {
   const hud = $('hud');
@@ -41,11 +44,15 @@ export function initUi(actions: UiActions): void {
   const settings = $('screen-settings');
   const board = $('screen-board');
   const guide = $('screen-guide');
+  const picker = $('lang-picker');
   $('aim-hint').querySelector('.aim-hand')!.innerHTML = HAND_SVG;
   let levelIndex = 0;
   let lastScore = 0;
   let homeArtDone = false;
+  let lastHud: HudState | null = null;
+  let lastEnd: { r: LevelResult; won: boolean } | null = null;
 
+  applyStatic();
   $('home-photo').style.backgroundImage = `url("${homePhotoUrl()}")`;
 
   const hideAll = (): void => {
@@ -53,18 +60,30 @@ export function initUi(actions: UiActions): void {
     for (const el of [hud, home, map, end, collection, viewer, settings, board, guide]) el.classList.add('hidden');
   };
 
+  // ───────────────────────────── Accueil ─────────────────────────────
+  const renderHome = (): void => {
+    const save = loadSave();
+    $('home-progress').textContent =
+      save.unlocked > 0
+        ? t('home.progress', {
+            stars: totalStars(),
+            level: Math.min(save.unlocked + 1, LEVELS.length),
+            total: LEVELS.length,
+          })
+        : '';
+    $('home-collection').textContent = `${collectedCount()} / ${LEVELS.length}`;
+    $('home-version').textContent = t('home.version', { v: VERSION });
+  };
+
   const showHome = (): void => {
     hideAll();
-    const save = loadSave();
-    const stars = totalStars();
-    $('home-progress').textContent =
-      save.unlocked > 0 ? `★ ${stars} · Niveau ${Math.min(save.unlocked + 1, LEVELS.length)} sur ${LEVELS.length}` : '';
-    $('home-collection').textContent = `${collectedCount()} / ${LEVELS.length}`;
+    renderHome();
     home.classList.remove('hidden');
     music.play(MENU_MUSIC);
     actions.resume();
   };
 
+  // ───────────────────────────── Classement ─────────────────────────────
   const showBoard = (): void => {
     hideAll();
     actions.pause();
@@ -86,18 +105,14 @@ export function initUi(actions: UiActions): void {
     showHome();
   });
 
-  const showCollection = (): void => {
-    hideAll();
-    actions.pause();
+  // ───────────────────────────── Collection ─────────────────────────────
+  const renderCollectionScreen = (): void => {
     const count = collectedCount();
     $('collection-count').textContent = `${count} / ${LEVELS.length}`;
     $('collection-fill').style.width = `${(count / LEVELS.length) * 100}%`;
-    $('collection-hint').textContent =
-      count === 0
-        ? 'Terminez un niveau pour obtenir sa photographie.'
-        : count === LEVELS.length
-          ? 'Collection complète. Bravo !'
-          : 'Terminez les niveaux pour obtenir les photographies grisées.';
+    $('collection-hint').textContent = t(
+      count === 0 ? 'collection.none' : count === LEVELS.length ? 'collection.all' : 'collection.some',
+    );
     renderCollection($('collection-grid'), {
       onOpen: (url, caption) => {
         sfx.click();
@@ -107,9 +122,24 @@ export function initUi(actions: UiActions): void {
       },
       onLocked: () => sfx.bounce(),
     });
+  };
+
+  const showCollection = (): void => {
+    hideAll();
+    actions.pause();
+    renderCollectionScreen();
     $('collection-scroll').scrollTop = 0;
     music.play(MENU_MUSIC);
     collection.classList.remove('hidden');
+  };
+
+  // ───────────────────────────── Carte ─────────────────────────────
+  const renderMapScreen = (): number => {
+    $('map-stars').textContent = `${totalStars()} / ${LEVELS.length * 3}`;
+    return renderMap($('map-path'), {
+      onPick: (i) => play(i),
+      onLocked: () => sfx.bounce(),
+    });
   };
 
   const showMap = (): void => {
@@ -117,12 +147,8 @@ export function initUi(actions: UiActions): void {
     actions.pause();
     map.classList.remove('hidden');
     music.play(MENU_MUSIC);
-    $('map-stars').textContent = `${totalStars()} / ${LEVELS.length * 3}`;
+    const currentY = renderMapScreen();
     const scroll = $('map-scroll');
-    const currentY = renderMap($('map-path'), {
-      onPick: (i) => play(i),
-      onLocked: () => sfx.bounce(),
-    });
     const unit = $('stage').clientWidth / DESIGN_W;
     scroll.scrollTop = currentY * unit - scroll.clientHeight / 2;
   };
@@ -130,20 +156,21 @@ export function initUi(actions: UiActions): void {
   const play = (index: number): void => {
     sfx.click();
     hideAll();
+    lastEnd = null;
     hud.classList.remove('hidden');
     music.play(LEVELS[Math.max(0, Math.min(index, LEVELS.length - 1))].music);
     actions.startLevel(Math.max(0, Math.min(index, LEVELS.length - 1)));
   };
 
-  // ── Réglages du son : deux curseurs, appliqués et mémorisés immédiatement.
+  // ───────────────────────────── Réglages ─────────────────────────────
   const musicInput = $<HTMLInputElement>('music-volume');
   const sfxInput = $<HTMLInputElement>('sfx-volume');
-  const pct = (v: number): number => Math.round(v * 100);
+  const percent = (v: number): number => Math.round(v * 100);
   const renderVolumes = (): void => {
-    musicInput.value = String(pct(music.volume));
-    sfxInput.value = String(pct(sfx.volume));
-    $('music-value').textContent = `${pct(music.volume)} %`;
-    $('sfx-value').textContent = `${pct(sfx.volume)} %`;
+    musicInput.value = String(percent(music.volume));
+    sfxInput.value = String(percent(sfx.volume));
+    $('music-value').textContent = pct(percent(music.volume));
+    $('sfx-value').textContent = pct(percent(sfx.volume));
     for (const input of [musicInput, sfxInput]) input.style.setProperty('--fill', `${input.value}%`);
   };
   const initial = loadSave();
@@ -169,16 +196,49 @@ export function initUi(actions: UiActions): void {
   });
   sfxInput.addEventListener('change', () => writeSave({ sfxVolume: sfx.volume }));
 
+  // Choix de la langue : bouton à drapeau en bas à droite des réglages.
+  const renderLangButton = (): void => {
+    const info = langInfo();
+    $('lang-current').innerHTML = `${info.flag}<span>${info.name}</span>`;
+  };
+  picker.innerHTML =
+    `<p class="lang-title" data-i18n="settings.language"></p><div class="lang-grid">` +
+    LANGS.map(
+      (l) =>
+        `<button type="button" class="lang-option" data-lang="${l.code}" lang="${l.code}">${l.flag}<span>${l.name}</span></button>`,
+    ).join('') +
+    `</div>`;
+  const markCurrentLang = (): void => {
+    picker.querySelectorAll<HTMLElement>('.lang-option').forEach((b) => {
+      b.setAttribute('aria-pressed', String(b.dataset.lang === lang()));
+    });
+  };
+  $('btn-lang').addEventListener('click', () => {
+    sfx.click();
+    markCurrentLang();
+    picker.classList.toggle('hidden');
+  });
+  picker.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('.lang-option');
+    if (!btn) return;
+    sfx.click();
+    setLang(btn.dataset.lang as Lang);
+    picker.classList.add('hidden');
+  });
+
   let pausedForSettings = false;
   const openSettings = (): void => {
     sfx.click();
     renderVolumes();
-    pausedForSettings = !hud.classList.contains('hidden');
+    renderLangButton();
+    picker.classList.add('hidden');
+    pausedForSettings = visible(hud);
     if (pausedForSettings) actions.pause();
     settings.classList.remove('hidden');
   };
   const closeSettings = (): void => {
     settings.classList.add('hidden');
+    picker.classList.add('hidden');
     writeSave({ musicVolume: music.volume, sfxVolume: sfx.volume });
     if (pausedForSettings) actions.resume();
     pausedForSettings = false;
@@ -199,6 +259,7 @@ export function initUi(actions: UiActions): void {
   window.addEventListener('pointerdown', firstGesture, { capture: true });
   window.addEventListener('keydown', firstGesture, { capture: true });
 
+  // ───────────────────────────── Navigation ─────────────────────────────
   $('btn-play').addEventListener('click', () => {
     sfx.unlock();
     sfx.click();
@@ -218,10 +279,13 @@ export function initUi(actions: UiActions): void {
     viewer.classList.add('hidden');
   });
   // « Comment jouer » : toutes les règles, depuis la carte des niveaux.
+  const renderGuideScreen = (): void => {
+    renderGuide($('guide-content'), actions.menuArt()?.bubbles, photoUrl(LEVELS[0]) ?? homePhotoUrl());
+  };
   $('btn-guide').addEventListener('click', () => {
     sfx.click();
     hideAll();
-    renderGuide($('guide-content'), actions.menuArt()?.bubbles, photoUrl(LEVELS[0]) ?? homePhotoUrl());
+    renderGuideScreen();
     $('guide-scroll').scrollTop = 0;
     guide.classList.remove('hidden');
   });
@@ -245,10 +309,11 @@ export function initUi(actions: UiActions): void {
   $('btn-again').addEventListener('click', () => play(levelIndex));
   $('btn-next').addEventListener('click', () => play(levelIndex + 1));
 
+  // ───────────────────────────── Partie ─────────────────────────────
   bus.on('ready', (e) => {
     // Explications pour les nouveaux joueurs (une seule fois).
     hideTips();
-    const tip = hud.classList.contains('hidden') ? null : tipFor(e.levelIndex);
+    const tip = visible(hud) ? tipFor(e.levelIndex) : null;
     if (tip === 'intro') {
       // La scène est encore en création : la pause est appliquée juste après.
       window.setTimeout(() => actions.pause(), 0);
@@ -278,56 +343,79 @@ export function initUi(actions: UiActions): void {
     lastScore = 0;
   });
 
-  bus.on('hud', (s) => {
-    // Premier tir joué : la main d'aide à la visée disparaît.
-    if (s.shots < LEVELS[levelIndex].shots) hideAimHint();
+  const renderHud = (s: HudState): void => {
     $('hud-level').textContent = String(s.levelNumber);
     $('hud-shots').textContent = String(s.shots);
     shotsPill.classList.toggle('low', s.shots > 0 && s.shots <= 5);
+    scoreEl.textContent = num(s.score);
+    $('reveal-fill').style.width = `${s.percent}%`;
+    $('reveal-target').style.left = `${s.target}%`;
+    $('reveal-text').textContent = t('hud.reveal', { p: pct(s.percent), t: pct(s.target) });
+  };
+
+  bus.on('hud', (s) => {
+    // Premier tir joué : la main d'aide à la visée disparaît.
+    if (s.shots < LEVELS[levelIndex].shots) hideAimHint();
+    lastHud = s;
+    renderHud(s);
     if (s.score !== lastScore) {
       lastScore = s.score;
-      scoreEl.textContent = s.score.toLocaleString('fr-FR');
       scoreEl.classList.remove('bump');
       void scoreEl.offsetWidth;
       scoreEl.classList.add('bump');
     }
-    $('reveal-fill').style.width = `${s.percent}%`;
-    $('reveal-target').style.left = `${s.target}%`;
-    $('reveal-text').textContent = `${s.percent} % · objectif ${s.target} %`;
   });
 
-  const showEnd = (r: LevelResult, won: boolean): void => {
-    // Si le joueur a quitté le niveau entre-temps, on n'affiche rien.
-    if (hud.classList.contains('hidden')) return;
-    $('end-title').textContent = won ? 'Photo révélée !' : r.reason === 'line' ? 'Les boules ont débordé…' : 'Plus de tirs…';
+  const renderEnd = (r: LevelResult, won: boolean): void => {
+    $('end-title').textContent = t(won ? 'end.won' : r.reason === 'line' ? 'end.line' : 'end.shots');
     $('end-sub').textContent = won
-      ? `Niveau ${r.levelNumber} · « ${r.title} »`
-      : `La photo n'était révélée qu'à ${r.percent} %. Encore un effort !`;
+      ? t('end.wonSub', { n: r.levelNumber, title: levelTitle(r.levelIndex) })
+      : t('end.lostSub', { p: pct(r.percent) });
     const stars = $('end-stars');
     stars.classList.toggle('hidden', !won);
     [...stars.children].forEach((el, i) => el.classList.toggle('on', i < r.stars));
-    $('end-score').textContent = r.score.toLocaleString('fr-FR');
-    $('end-percent').textContent = `${won ? 100 : r.percent} %`;
+    $('end-score').textContent = num(r.score);
+    $('end-percent').textContent = pct(won ? 100 : r.percent);
     $('end-shots').textContent = String(r.shotsLeft);
     const next = $('btn-next');
     const again = $('btn-again');
     next.classList.toggle('hidden', !won || !r.hasNext);
-    again.textContent = won ? 'Rejouer' : 'Réessayer';
+    again.textContent = t(won ? 'end.again' : 'end.retry');
     again.className = `btn ${won && r.hasNext ? 'secondary' : 'primary'}`;
-    $('end-note').textContent = won && !r.hasNext ? 'Bravo ! De nouveaux niveaux arrivent bientôt.' : '';
+    let note = won && !r.hasNext ? t('end.allDone') : '';
+    if (won && !note && isOnline() && !playerPseudo()) note = t('end.pseudoHint');
+    $('end-note').textContent = note;
+  };
+
+  const showEnd = (r: LevelResult, won: boolean): void => {
+    // Si le joueur a quitté le niveau entre-temps, on n'affiche rien.
+    if (!visible(hud)) return;
+    lastEnd = { r, won };
+    renderEnd(r, won);
     end.classList.remove('hidden');
   };
 
   bus.on('win', (r) => {
     showEnd(r, true);
-    if (isOnline()) {
-      void syncScores();
-      if (!playerPseudo() && !$('end-note').textContent) {
-        $('end-note').textContent = 'Choisissez un pseudo dans « Classement » pour comparer vos scores.';
-      }
-    }
+    if (isOnline()) void syncScores();
   });
   bus.on('lose', (r) => showEnd(r, false));
+
+  // ───────────────────────────── Changement de langue ─────────────────────────────
+  // Tous les écrans visibles sont redessinés aussitôt dans la nouvelle langue.
+  onLangChange(() => {
+    applyStatic();
+    renderVolumes();
+    renderLangButton();
+    markCurrentLang();
+    renderHome();
+    if (visible(map)) renderMapScreen();
+    if (visible(collection)) renderCollectionScreen();
+    if (visible(board)) renderBoard();
+    if (visible(guide)) renderGuideScreen();
+    if (lastHud) renderHud(lastHud);
+    if (lastEnd && visible(end)) renderEnd(lastEnd.r, lastEnd.won);
+  });
 
   showHome();
 }

@@ -67,7 +67,8 @@ declare
 begin
   if length(coalesce(p_token, '')) < 20 then raise exception 'jeton_invalide'; end if;
   if char_length(v_pseudo) < 3 or char_length(v_pseudo) > 16 then raise exception 'pseudo_longueur'; end if;
-  if v_pseudo !~ '^[A-Za-z0-9À-ÖØ-öø-ÿ _.\-]+$' then raise exception 'pseudo_caracteres'; end if;
+  -- Lettres latines (dont polonais, turc, roumain…) et cyrilliques (russe).
+  if v_pseudo !~ '^[A-Za-z0-9À-ÖØ-öø-ÿĀ-ɏЀ-ӿ _.\-]+$' then raise exception 'pseudo_caracteres'; end if;
   if exists (select 1 from players where pseudo_key = v_key and id <> p_id) then
     raise exception 'pseudo_pris';
   end if;

@@ -1,19 +1,17 @@
+import { esc, num, t } from '../i18n';
 import { BoardError, fetchBoard, playerPseudo, setPseudo, type BoardRow } from '../services/Leaderboard';
 
 /** Écran « Classement » : pseudo du joueur et meilleurs scores cumulés. */
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 
-const esc = (s: string): string =>
-  s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
-
-const fmt = (n: number): string => Number(n).toLocaleString('fr-FR');
+const fmt = num;
 
 function rowHtml(r: BoardRow): string {
   const medal = r.rank <= 3 ? ` medal-${r.rank}` : '';
   return `<li class="board-row${r.is_me ? ' me' : ''}${medal}">
     <span class="b-rank">${r.rank}</span>
     <span class="b-name">${esc(r.pseudo)}</span>
-    <span class="b-levels">${r.levels} niv. · ★ ${r.stars}</span>
+    <span class="b-levels">${esc(t('board.levels', { n: r.levels }))} · ★ ${r.stars}</span>
     <span class="b-score">${fmt(r.total)}</span>
   </li>`;
 }
@@ -34,24 +32,24 @@ export function renderBoard(): void {
   if (pseudo) $('board-me-name').textContent = pseudo;
   $('board-me-rank').textContent = '';
 
-  status.textContent = 'Chargement du classement…';
+  status.textContent = t('board.loading');
   list.innerHTML = '';
   const id = ++requestId;
   fetchBoard().then(
     ({ top, me }) => {
       if (id !== requestId) return;
       list.innerHTML = top.map(rowHtml).join('');
-      status.textContent = top.length ? '' : 'Personne au classement pour l’instant. Soyez le premier !';
+      status.textContent = top.length ? '' : t('board.empty');
       if (me) {
-        $('board-me-rank').textContent = `${me.rank}ᵉ · ${fmt(me.total)} points`;
+        $('board-me-rank').textContent = t('board.myRank', { rank: t('rank', { n: me.rank }), total: fmt(me.total) });
         if (!top.some((r) => r.is_me)) list.insertAdjacentHTML('beforeend', `<li class="board-gap">…</li>${rowHtml({ ...me, is_me: true })}`);
       } else if (pseudo) {
-        $('board-me-rank').textContent = 'Terminez le niveau 1 pour entrer au classement.';
+        $('board-me-rank').textContent = t('board.firstLevel');
       }
     },
     (e: unknown) => {
       if (id !== requestId) return;
-      status.textContent = e instanceof BoardError ? e.message : 'Classement indisponible.';
+      status.textContent = e instanceof BoardError ? e.message : t('board.unavailable');
     },
   );
 
@@ -69,11 +67,11 @@ export function initBoard(onClick: () => void): void {
     const value = input.value.trim();
     const msg = $('board-form-msg');
     if (value.length < 3 || value.length > 16) {
-      msg.textContent = 'Le pseudo doit faire entre 3 et 16 caractères.';
+      msg.textContent = t('board.length');
       return;
     }
     submit.disabled = true;
-    msg.textContent = 'Enregistrement…';
+    msg.textContent = t('board.saving');
     setPseudo(value).then(
       () => {
         submit.disabled = false;
@@ -81,7 +79,7 @@ export function initBoard(onClick: () => void): void {
       },
       (err: unknown) => {
         submit.disabled = false;
-        msg.textContent = err instanceof BoardError ? err.message : 'Le pseudo n’a pas pu être enregistré.';
+        msg.textContent = err instanceof BoardError ? err.message : t('board.saveFailed');
       },
     );
   });

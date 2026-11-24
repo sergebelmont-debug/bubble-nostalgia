@@ -1,4 +1,5 @@
 import { LEVELS } from '../data/levels';
+import { esc, levelTitle, t } from '../i18n';
 import { photoUrl, thumbnailUrl } from '../services/PhotoService';
 import { loadSave } from '../services/SaveService';
 
@@ -24,7 +25,8 @@ export interface CollectionHandlers {
 export function renderCollection(container: HTMLElement, handlers: CollectionHandlers): void {
   const best = loadSave().best;
   container.innerHTML = '';
-  for (const level of LEVELS) {
+  LEVELS.forEach((level, index) => {
+    const title = levelTitle(index);
     const owned = Boolean(best[level.id]);
     const thumb = thumbnailUrl(level) ?? photoUrl(level);
     const tile = document.createElement('button');
@@ -32,16 +34,16 @@ export function renderCollection(container: HTMLElement, handlers: CollectionHan
     tile.className = `tile ${owned ? 'owned' : 'locked'}`;
     tile.setAttribute(
       'aria-label',
-      owned ? `Photo ${level.number} : ${level.title}` : `Photo ${level.number} verrouillée : terminez le niveau ${level.number}`,
+      owned ? t('collection.owned', { n: level.number, title }) : t('collection.lockedAria', { n: level.number }),
     );
     const img = thumb ? `<img src="${thumb}" alt="" loading="lazy" draggable="false" />` : '';
     tile.innerHTML = owned
-      ? `${img}<span class="tile-cap"><b>${level.number}</b>${level.title}</span>`
-      : `${img}<span class="tile-lock">${LOCK_ICON}<i>Niveau ${level.number}</i></span>`;
+      ? `${img}<span class="tile-cap"><b>${level.number}</b>${esc(title)}</span>`
+      : `${img}<span class="tile-lock">${LOCK_ICON}<i>${esc(t('collection.lockedTile', { n: level.number }))}</i></span>`;
     tile.addEventListener('click', () => {
       const full = photoUrl(level) ?? thumb;
       if (owned && full) {
-        handlers.onOpen(full, `${level.number} · ${level.title}`);
+        handlers.onOpen(full, `${level.number} · ${title}`);
       } else {
         tile.classList.remove('shake');
         void tile.offsetWidth;
@@ -50,5 +52,5 @@ export function renderCollection(container: HTMLElement, handlers: CollectionHan
       }
     });
     container.appendChild(tile);
-  }
+  });
 }

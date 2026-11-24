@@ -1,5 +1,7 @@
 import { isOnline, ONLINE } from '../config/online';
 import { LEVELS } from '../data/levels';
+import { t } from '../i18n';
+import type { TextKey } from '../i18n/fr';
 import { loadSave } from './SaveService';
 
 /**
@@ -60,11 +62,12 @@ function persist(): void {
   }
 }
 
-const MESSAGES: Record<string, string> = {
-  pseudo_pris: 'Ce pseudo est déjà pris, choisissez-en un autre.',
-  pseudo_longueur: 'Le pseudo doit faire entre 3 et 16 caractères.',
-  pseudo_caracteres: 'Lettres, chiffres, espaces, points, tirets et « _ » uniquement.',
-  trop_rapide: 'Un instant… réessayez dans quelques secondes.',
+/** Codes d'erreur renvoyés par le serveur → texte traduit. */
+const MESSAGES: Record<string, TextKey> = {
+  pseudo_pris: 'board.taken',
+  pseudo_longueur: 'board.length',
+  pseudo_caracteres: 'board.chars',
+  trop_rapide: 'board.tooFast',
 };
 
 export class BoardError extends Error {}
@@ -81,7 +84,7 @@ async function rpc<T>(name: string, body: Record<string, unknown>): Promise<T> {
       signal: ctrl.signal,
     });
   } catch {
-    throw new BoardError('Classement indisponible : vérifiez votre connexion.');
+    throw new BoardError(t('board.offline'));
   } finally {
     window.clearTimeout(timer);
   }
@@ -92,7 +95,7 @@ async function rpc<T>(name: string, body: Record<string, unknown>): Promise<T> {
     } catch {
       /* réponse illisible */
     }
-    throw new BoardError(MESSAGES[code] ?? 'Le classement n’a pas pu être mis à jour.');
+    throw new BoardError(t(MESSAGES[code] ?? 'board.updateFailed'));
   }
   return (await res.json()) as T;
 }

@@ -1,4 +1,6 @@
 import '@fontsource-variable/fredoka';
+// Lettres cyrilliques (russe) : Fredoka n'en a pas, Nunito prend le relais.
+import '@fontsource-variable/nunito/wght.css';
 import '@fontsource/cormorant-garamond/600-italic.css';
 import '@fontsource/great-vibes/400.css';
 import './styles/main.css';
@@ -16,6 +18,7 @@ async function boot(): Promise<void> {
   try {
     await Promise.race([
       document.fonts.load('700 32px "Fredoka Variable"'),
+      document.fonts.load('700 32px "Nunito Variable"', 'Яя'),
       new Promise((resolve) => setTimeout(resolve, 1500)),
     ]);
   } catch {

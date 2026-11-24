@@ -12,6 +12,8 @@ export interface SaveData {
   musicVolume: number;
   /** Explications déjà vues (voir ui/Tutorial.ts). */
   tips: string[];
+  /** Langue choisie par le joueur (voir i18n). */
+  lang?: string;
 }
 
 const DEFAULTS: SaveData = { unlocked: 0, best: {}, sfxVolume: 0.8, musicVolume: 0.6, tips: [] };

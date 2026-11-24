@@ -1,4 +1,5 @@
 import { LEVELS } from '../data/levels';
+import { esc, pct, t } from '../i18n';
 import { loadSave, writeSave } from '../services/SaveService';
 
 /**
@@ -65,13 +66,13 @@ export function aimDemo(): string {
 export function showIntro(opts: { target: number; photo: string; bubble?: string }, onDone: () => void): void {
   const root = $('intro');
   root.innerHTML = `<div class="intro-card" role="dialog" aria-labelledby="intro-title">
-    <h3 id="intro-title">Comment jouer</h3>
+    <h3 id="intro-title">${esc(t('intro.title'))}</h3>
     ${matchDemo(opts.bubble, opts.photo)}
-    <p class="intro-line"><b>3 boules de la même couleur</b> ou plus éclatent et dévoilent la photo.</p>
+    <p class="intro-line">${t('intro.matchHtml')}</p>
     ${aimDemo()}
-    <p class="intro-line"><b>Glissez</b> pour viser, <b>relâchez</b> pour tirer.</p>
-    <p class="intro-goal">Objectif : <b>${opts.target} %</b> de la photo</p>
-    <button id="btn-intro-go" class="btn primary" type="button">C’est parti !</button>
+    <p class="intro-line">${t('intro.aimHtml')}</p>
+    <p class="intro-goal">${t('intro.goalHtml', { p: esc(pct(opts.target)) })}</p>
+    <button id="btn-intro-go" class="btn primary" type="button">${esc(t('intro.go'))}</button>
   </div>`;
   root.classList.remove('hidden');
   $('btn-intro-go').addEventListener('click', () => {
@@ -96,7 +97,7 @@ let toastTimer = 0;
 /** Court bandeau d'information (sans pause). */
 export function showWallsTip(): void {
   const toast = $('tip-toast');
-  toast.innerHTML = '<b>Nouveau : les murs</b><span>Incassables : la boule rebondit dessus comme sur les bords.</span>';
+  toast.innerHTML = `<b>${esc(t('walls.title'))}</b><span>${esc(t('walls.text'))}</span>`;
   toast.classList.remove('hidden');
   markSeen('murs');
   window.clearTimeout(toastTimer);

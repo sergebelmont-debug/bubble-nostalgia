@@ -1,4 +1,5 @@
 import { LEVELS } from '../data/levels';
+import { esc, levelTitle, t } from '../i18n';
 import { loadSave } from '../services/SaveService';
 
 /**
@@ -65,7 +66,7 @@ export function renderMap(container: HTMLElement, handlers: MapHandlers): number
     btn.style.top = `calc(var(--u) * ${nodeY(i)})`;
     btn.setAttribute(
       'aria-label',
-      locked ? `Niveau ${level.number} verrouillé` : `Niveau ${level.number} : ${level.title}`,
+      locked ? t('map.locked', { n: level.number }) : t('map.level', { n: level.number, title: levelTitle(i) }),
     );
     if (locked) {
       btn.innerHTML = LOCK_ICON;
@@ -74,7 +75,7 @@ export function renderMap(container: HTMLElement, handlers: MapHandlers): number
       btn.innerHTML =
         `${level.number}` +
         `<span class="node-stars">${[0, 1, 2].map((s) => `<i class="${s < stars ? 'on' : ''}">★</i>`).join('')}</span>` +
-        (isCurrent ? `<span class="node-title">${level.title}</span>` : '');
+        (isCurrent ? `<span class="node-title">${esc(levelTitle(i))}</span>` : '');
     }
     btn.addEventListener('click', () => {
       if (locked) {
