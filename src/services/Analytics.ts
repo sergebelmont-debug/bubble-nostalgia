@@ -85,6 +85,9 @@ function source(): string {
     [/(^|\.)youtube\.com$|youtu\.be$/, 'youtube'],
     [/(^|\.)google\./, 'google'],
     [/(^|\.)whatsapp\./, 'whatsapp'],
+    [/(^|\.)submithub\.com$/, 'submithub'],
+    [/(^|\.)spotify\.com$/, 'spotify'],
+    [/(^|\.)(twitter|x)\.com$|^t\.co$/, 'x'],
     [/sergebelmont\.com$/, 'site'],
   ];
   for (const [re, name] of known) if (re.test(host)) return name;
