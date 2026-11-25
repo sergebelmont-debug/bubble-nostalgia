@@ -117,7 +117,9 @@ class Analytics {
   }
 
   private get enabled(): boolean {
-    return isOnline() && !this.optedOut;
+    // Uniquement sur le vrai site : les essais en local ne faussent pas les chiffres.
+    const realSite = /(^|\.)sergebelmont\.com$/.test(location.hostname);
+    return realSite && isOnline() && !this.optedOut;
   }
 
   /** À appeler une fois au démarrage. */
