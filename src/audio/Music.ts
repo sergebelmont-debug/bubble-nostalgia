@@ -1,3 +1,4 @@
+import { musicUrl } from './musicFiles';
 import { sfx } from './Sfx';
 
 /**
@@ -16,7 +17,6 @@ import { sfx } from './Sfx';
  * SEUL endroit qui connaît le dossier des musiques : les niveaux ne donnent
  * que le nom du fichier (voir data/levels.ts).
  */
-const MUSIC_DIR = 'assets/audio/music/';
 const FADE_S = 0.7;
 
 interface Track {
@@ -50,12 +50,21 @@ class MusicPlayer {
     this.track = null;
     if (old) this.fadeOut(old);
     if (!file) return;
-    const el = new Audio(`${import.meta.env.BASE_URL}${MUSIC_DIR}${file}`);
-    el.loop = true;
-    el.preload = 'auto';
-    this.track = { el, gain: null, fade: 0 };
-    this.applyFallbackVolume(this.track);
-    this.sync();
+    // Le morceau est téléchargé chiffré puis déchiffré en mémoire (voir musicFiles.ts).
+    musicUrl(file).then(
+      (url) => {
+        if (this.file !== file || this.track) return; // une autre piste a été demandée entre-temps
+        const el = new Audio(url);
+        el.loop = true;
+        el.preload = 'auto';
+        this.track = { el, gain: null, fade: 0 };
+        this.applyFallbackVolume(this.track);
+        this.sync();
+      },
+      () => {
+        /* clé ou fichier indisponible : le jeu reste jouable, sans musique */
+      },
+    );
   }
 
   setVolume(volume: number): void {

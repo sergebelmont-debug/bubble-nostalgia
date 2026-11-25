@@ -4,3 +4,8 @@ dist/
 .DS_Store
 Thumbs.db
 .vite/
+
+# Musiques en clair et clé de chiffrement : jamais sur GitHub
+audio-source/
+.env.local
+.env*.local

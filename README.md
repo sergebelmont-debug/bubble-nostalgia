@@ -85,12 +85,16 @@ Aucun pour le moment. Le classement communautaire et la sauvegarde en ligne
 
 ## Musique
 
-Les musiques sont dans `public/assets/audio/music/` (MP3). Le menu utilise
-`MENU_MUSIC` et chaque niveau son champ `music` dans
-[src/data/levels.ts](src/data/levels.ts). Pour convertir un fichier WAV :
-`ffmpeg -i chanson.wav -af loudnorm=I=-18:TP=-1.5:LRA=11 -ar 44100 -b:a 96k chanson.mp3`.
-Le joueur règle séparément le volume de la musique et des effets sonores
-(bouton Réglages, roue dentée, sur l'accueil et pendant les parties).
+Les musiques sont **chiffrées** : le dépôt et le site ne contiennent que des fichiers
+`public/assets/audio/music/*.bin` (AES-GCM 256), déchiffrés dans le navigateur au moment de jouer.
+
+- MP3 en clair : `audio-source/music/` (sur votre PC uniquement, jamais envoyé sur GitHub).
+- Clé : `VITE_MUSIC_KEY` dans `.env.local` (PC) et secret GitHub `MUSIC_KEY` (mise en ligne).
+- Ajouter ou remplacer un morceau : déposer le MP3 dans `audio-source/music/`, puis `npm run music:encrypt`.
+- Le menu utilise `MENU_MUSIC` et chaque niveau son champ `music` dans [src/data/levels.ts](src/data/levels.ts).
+
+Limite : le son peut toujours être enregistré pendant qu’il joue, et une personne très
+technique peut retrouver la clé dans le code du site. C’est un frein, pas un verrou.
 
 ## Classement en ligne (Supabase, gratuit)
 

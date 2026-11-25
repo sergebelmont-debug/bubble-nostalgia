@@ -26,6 +26,11 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env:
+          # Clé de déchiffrement des musiques (secret du dépôt, jamais écrit dans le code).
+          VITE_MUSIC_KEY: ${{ secrets.MUSIC_KEY }}
+      - name: Aucune musique en clair dans le site
+        run: "! find dist -iname '*.mp3' | grep -q ."
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
